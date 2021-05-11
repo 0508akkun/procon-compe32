@@ -7,4 +7,4 @@
 mainは基本的にdevelopのみからmarge(基本的に吉岡だけがmergeする事になると思われる)
 developからブランチを切ってfeatureで各機能を作成し、それが終わったらdevelopへpull requestを送るという流れ
 featureのブランチ名は何でも良いが必ず「feature/○○」というように先頭にfeatureと付けること
-
+## pushはfeatureブランチ内のみ使用可
