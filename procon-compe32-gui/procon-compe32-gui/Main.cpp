@@ -17,20 +17,28 @@ Array<TextureRegion> LoadTextureRegions(const FilePath& path, const Size& size)
 
 void Main()
 {
-	Image{ U"example/windmill.png" }.savePPM(U"P3.ppm", PPMType::P3);
+	Image image{ U"P3.ppm" };
 
-	Texture texturePPM{ U"P3.ppm" };
+	Texture texturePPM{ image };
 
 	const Array<TextureRegion> textureRegions = LoadTextureRegions(U"P3.ppm", Size(40, 20));
 
 	while (System::Update())
 	{
+		const Point pos = Cursor::Pos();
+		const Color pixelColor = image[pos.y][pos.x];
 		for (size_t i = 0; i < textureRegions.size(); ++i)
 		{
 			textureRegions[i].draw(42 * (i % 12), 22 * (i / 12));
 		}
+		Circle(400, 400, 50).draw(pixelColor);
 	}
 }
+
+/*
+	色の取得は
+	const Color pixelColor = image[pos.y][pos.x];
+*/
 
 //
 // = アドバイス =
