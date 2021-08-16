@@ -29,6 +29,19 @@ void Main()
         lines << line;
         i++;
     }
+    Array<String> diviNum = lines[1].split(U' ');
+    const int32 verDiviNum = Parse<int32>(diviNum[1]);
+    const int32 horDiviNum = Parse<int32>(diviNum[2]);
+    Array<String> seleLimNumStr = lines[2].split(U' ');
+    const int32 seleLimNum = Parse<int32>(seleLimNumStr[1]);
+    Array<String> cost = lines[3].split(U' ');
+    const int32 selectCost = Parse<int32>(cost[1]);
+    const int32 changeCost = Parse<int32>(cost[2]);
+    Array<String> imageSize = lines[4].split(U' ');
+    const int32 width = Parse<int32>(imageSize[0]);
+    const int32 height = Parse<int32>(imageSize[1]);
+    Image image(width, height, Palette::White);
+    DynamicTexture texture(image);
 
 	while (System::Update())
 	{
@@ -39,10 +52,7 @@ void Main()
             {
                 Print << U"{}"_fmt(line_data);
             }
-            Array<String> imageSize = lines[4].split(U' ');
-            const int32 width = Parse<int32>(imageSize[0]);
-            const int32 height = Parse<int32>(imageSize[1]);
-            Print << width << height;
 		}
+        texture.draw(10, 10);
 	}
 }
