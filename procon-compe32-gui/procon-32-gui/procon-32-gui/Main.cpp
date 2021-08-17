@@ -14,8 +14,9 @@ void Main()
 
     // 行の内容を読み込む変数
     String line;
-
-    Array<String> lines;
+    String pixelValue = U"";
+    Array<String> headerData;
+    Array<String> pixelData;
 
     // 行数の表示用のカウント
     size_t i = 0;
@@ -24,31 +25,41 @@ void Main()
     while (reader.readLine(line))
     {
         if (i > 5) {
-            break;
+            pixelData << line;
         }
-        lines << line;
+        else {
+            headerData << line;
+        }
         i++;
     }
-    Array<String> diviNum = lines[1].split(U' ');
+    for (const auto& pixelLine : pixelData) {
+        pixelValue += pixelLine;
+    }
+    Array<String> diviNum = headerData[1].split(U' ');
     const int32 verDiviNum = Parse<int32>(diviNum[1]);
     const int32 horDiviNum = Parse<int32>(diviNum[2]);
-    Array<String> seleLimNumStr = lines[2].split(U' ');
+    Array<String> seleLimNumStr = headerData[2].split(U' ');
     const int32 seleLimNum = Parse<int32>(seleLimNumStr[1]);
-    Array<String> cost = lines[3].split(U' ');
+    Array<String> cost = headerData[3].split(U' ');
     const int32 selectCost = Parse<int32>(cost[1]);
     const int32 changeCost = Parse<int32>(cost[2]);
-    Array<String> imageSize = lines[4].split(U' ');
-    const int32 width = Parse<int32>(imageSize[0]);
-    const int32 height = Parse<int32>(imageSize[1]);
-    Image image(width, height, Palette::White);
-    DynamicTexture texture(image);
-
+    Array<String> imageSize = headerData[4].split(U' ');
+    const int32 imageWidth = Parse<int32>(imageSize[0]);
+    const int32 imageHeight = Parse<int32>(imageSize[1]);
+    Image image(imageWidth, imageHeight, Palette::White);
+    Array<String> pixel = pixelValue.split(U' ');
+    for (int32 y = 0; y < imageHeight; y++) {
+        for (int32 x = 0; x < imageWidth; x++) {
+            image[y][x] = Color(Parse<uint8>(pixel[(y * imageWidth + x) * 3]), Parse<uint8>(pixel[(y * imageWidth + x) * 3 + 1]), Parse<uint8>(pixel[(y * imageWidth + x) * 3 + 2]));
+        }
+    }
+    const Texture texture(image);
 	while (System::Update())
 	{
 		// ボタンが押されたら
 		if (SimpleGUI::Button(U"Read PPM File", Vec2(600, 20)))
 		{
-            for (const auto& line_data : lines)
+            for (const auto& line_data : headerData)
             {
                 Print << U"{}"_fmt(line_data);
             }
