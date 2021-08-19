@@ -36,8 +36,8 @@ void Main()
         pixelValue += pixelLine;
     }
     Array<String> diviNum = headerData[1].split(U' ');
-    const int32 verDiviNum = Parse<int32>(diviNum[1]);
-    const int32 horDiviNum = Parse<int32>(diviNum[2]);
+    const int32 horDiviNum = Parse<int32>(diviNum[1]);
+    const int32 verDiviNum = Parse<int32>(diviNum[2]);
     Array<String> seleLimNumStr = headerData[2].split(U' ');
     const int32 seleLimNum = Parse<int32>(seleLimNumStr[1]);
     Array<String> cost = headerData[3].split(U' ');
@@ -48,11 +48,12 @@ void Main()
     const int32 imageHeight = Parse<int32>(imageSize[1]);
     Image image(imageWidth, imageHeight, Palette::White);
     Array<String> pixel = pixelValue.split(U' ');
-    for (int32 y = 0; y < imageHeight; y++) {
-        for (int32 x = 0; x < imageWidth; x++) {
+    for (int32 y = 0; y < image.height(); y++) {
+        for (int32 x = 0; x < image.width(); x++) {
             image[y][x] = Color(Parse<uint8>(pixel[(y * imageWidth + x) * 3]), Parse<uint8>(pixel[(y * imageWidth + x) * 3 + 1]), Parse<uint8>(pixel[(y * imageWidth + x) * 3 + 2]));
         }
     }
+    const int32 pieceWH = imageHeight / verDiviNum;
     const Texture texture(image);
 	while (System::Update())
 	{
@@ -64,6 +65,10 @@ void Main()
                 Print << U"{}"_fmt(line_data);
             }
 		}
-        texture.draw(10, 10);
+        for (int32 i = 0; i < verDiviNum; i++) {
+            for (int32 j = 0; j < horDiviNum; j++) {
+                texture(pieceWH * j, pieceWH * i, pieceWH, pieceWH).draw((pieceWH + 10) * j, (pieceWH + 10) * i);
+            }
+        }
 	}
 }
