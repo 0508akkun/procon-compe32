@@ -3,18 +3,18 @@
 
 class TexturePiece
 {
-	Texture pieceTexture;
-	bool selectFlag;
-	int32 rotatedNum;
-	int32 pieceWH;
-	int32 x, y;
-	void setSelectFlag();
-	void liftSelectFlag();
-	bool checkSelectFlag();
-	void turnRight();
-	void turnLeft();
+	Texture pieceTexture;	//ピースのテクスチャ
+	bool selectFlag;	//ピースが選択されているか
+	int32 rotatedNum;	//回転情報
+	int32 pieceWH;	//ピースの縦横の大きさ(正方形)
+	int32 x, y;	//ピースの位置
+	void setSelectFlag();	//ピースを選択状態にする
+	void liftSelectFlag();	//ピースの選択状態を解除する
+	bool checkSelectFlag();	//選択されているか確認する
+	void turnRight();	//ピースを右に回転させる
+	void turnLeft();	//ピースを左に回転させる
 public:
 	TexturePiece(Texture texture, int32 x, int32 y, int32 wh);
-	TextureRegion showPieceTexture();
+	TextureRegion showPieceTexture();	//ピースを表示する
 };
 
