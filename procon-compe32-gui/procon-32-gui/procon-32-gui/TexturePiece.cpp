@@ -26,7 +26,12 @@ bool TexturePiece::checkSelectFlag()
 {
 	if (piece.leftClicked()) {
 		Print << U"Click";
-		setSelectFlag();
+		if (selectFlag) {
+			liftSelectFlag();
+		}
+		else{
+			setSelectFlag();
+		}
 	}
 	return selectFlag;
 }
@@ -58,6 +63,6 @@ TextureRegion TexturePiece::showPieceTexture() {
 }
 
 Rect TexturePiece::getPiece(int32 y,int32 x) {
-	piece = Rect((pieceWH + 10) * x, (pieceWH + 10) * y, pieceWH, pieceWH);
+	piece = Rect((pieceWH + 10) * x + imageOffsetX, (pieceWH + 10) * y + imageOffsetY, pieceWH, pieceWH);
 	return piece;
 }

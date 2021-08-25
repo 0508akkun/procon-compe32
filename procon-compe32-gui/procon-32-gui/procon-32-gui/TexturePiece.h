@@ -9,6 +9,8 @@ class TexturePiece
 	int32 rotatedNum;	//回転情報
 	int32 pieceWH;	//ピースの縦横の大きさ(正方形)
 	int32 x, y;	//ピースの位置
+	int32 imageOffsetX = 10;	//端に寄り過ぎると選択した時に色が見えなくなるためオフセットを作成
+	int32 imageOffsetY = 10;
 	void setSelectFlag();	//ピースを選択状態にする
 	void liftSelectFlag();	//ピースの選択状態を解除する
 	void turnRight();	//ピースを右に回転させる

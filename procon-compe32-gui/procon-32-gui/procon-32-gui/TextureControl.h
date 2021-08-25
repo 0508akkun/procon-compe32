@@ -20,6 +20,5 @@ public:
 	void pieceSwap();
 	Array<int32> setPieceID();
 	void showBoard();
-	void monitorState();
 };
 

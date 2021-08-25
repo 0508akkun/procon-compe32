@@ -7,6 +7,5 @@ void Main()
 	while (System::Update())
 	{
 		tc.showBoard();
-		tc.monitorState();
 	}
 }

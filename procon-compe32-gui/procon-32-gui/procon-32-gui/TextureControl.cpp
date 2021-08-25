@@ -81,15 +81,12 @@ void TextureControl::showBoard()
 {
     for (int32 i = 0; i < verDiviNum; i++) {
         for (int32 j = 0; j < horDiviNum; j++) {
-            board[i * horDiviNum + j].getPiece(i, j)(board[i * horDiviNum + j].showPieceTexture()).draw();
-        }
-    }
-}
-
-void TextureControl::monitorState() {
-    for (int32 i = 0; i < verDiviNum; i++) {
-        for (int32 j = 0; j < horDiviNum; j++) {
-            board[i * horDiviNum + j].checkSelectFlag();
+            if (board[i * horDiviNum + j].checkSelectFlag()) {
+                board[i * horDiviNum + j].getPiece(i, j)(board[i * horDiviNum + j].showPieceTexture()).draw().drawFrame(0, 3, Palette::Orange);
+            }
+            else {
+                board[i * horDiviNum + j].getPiece(i, j)(board[i * horDiviNum + j].showPieceTexture()).draw();
+            }
         }
     }
 }
