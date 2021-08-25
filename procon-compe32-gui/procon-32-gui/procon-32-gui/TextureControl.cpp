@@ -57,8 +57,8 @@ TextureControl::TextureControl()
             image[y][x] = Color(Parse<uint8>(pixel[(y * imageWidth + x) * 3]), Parse<uint8>(pixel[(y * imageWidth + x) * 3 + 1]), Parse<uint8>(pixel[(y * imageWidth + x) * 3 + 2]));
         }
     }
-    const int32 pieceWH = imageHeight / verDiviNum;
-    const Texture texture(image);
+    pieceWH = imageHeight / verDiviNum;
+    texture = Texture(image);
     //pieceÇÃê∂ê¨
     for (int32 i = 0; i < verDiviNum; i++) {
         for (int32 j = 0; j < horDiviNum; j++) {
@@ -75,4 +75,21 @@ void TextureControl::pieceSwap()
 Array<int32> TextureControl::setPieceID()
 {
 	return pieceID;
+}
+
+void TextureControl::showBoard()
+{
+    for (int32 i = 0; i < verDiviNum; i++) {
+        for (int32 j = 0; j < horDiviNum; j++) {
+            board[i * horDiviNum + j].getPiece(i, j)(board[i * horDiviNum + j].showPieceTexture()).draw();
+        }
+    }
+}
+
+void TextureControl::monitorState() {
+    for (int32 i = 0; i < verDiviNum; i++) {
+        for (int32 j = 0; j < horDiviNum; j++) {
+            board[i * horDiviNum + j].checkSelectFlag();
+        }
+    }
 }

@@ -1,14 +1,15 @@
 #include "TexturePiece.h"
 
 TexturePiece::TexturePiece(Texture texture, int32 x, int32 y, int32 wh)
-	:pieceTexture(texture),
+	:
 	selectFlag(false),
 	rotatedNum(0),
 	x(x),
 	y(y),
 	pieceWH(wh)
 {
-	
+	pieceTexture = texture(x, y, pieceWH, pieceWH);
+	piece = Rect();
 }
 
 void TexturePiece::setSelectFlag()
@@ -23,6 +24,10 @@ void TexturePiece::liftSelectFlag()
 
 bool TexturePiece::checkSelectFlag()
 {
+	if (piece.leftClicked()) {
+		Print << U"Click";
+		setSelectFlag();
+	}
 	return selectFlag;
 }
 
@@ -49,5 +54,10 @@ void TexturePiece::turnLeft()
 }
 
 TextureRegion TexturePiece::showPieceTexture() {
-	return pieceTexture(x, y, pieceWH, pieceWH);
+	return pieceTexture;
+}
+
+Rect TexturePiece::getPiece(int32 y,int32 x) {
+	piece = Rect((pieceWH + 10) * x, (pieceWH + 10) * y, pieceWH, pieceWH);
+	return piece;
 }

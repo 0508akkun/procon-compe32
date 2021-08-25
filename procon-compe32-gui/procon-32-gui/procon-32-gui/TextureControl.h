@@ -13,9 +13,13 @@ class TextureControl
 	int32 imageWidth;	//‰æ‘œ©‘Ì‚Ì•
 	int32 imageHeight;	//‰æ‘œ©‘Ì‚Ì‚‚³
 	Image image;	//‰æ‘œ‚»‚Ì‚à‚Ì
+	int32 pieceWH;
+	Texture texture;
 public:
 	TextureControl();
 	void pieceSwap();
 	Array<int32> setPieceID();
+	void showBoard();
+	void monitorState();
 };
 
