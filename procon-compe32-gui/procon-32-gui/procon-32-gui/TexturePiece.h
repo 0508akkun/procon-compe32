@@ -19,6 +19,8 @@ public:
 	void liftSelectFlag();
 	void setSelectFlag();	//ピースを選択状態にする
 	TextureRegion getPieceTexture();	//ピースを表示する
-	Rect getPiece(int32 y, int32 x);
+	Rect getPiece();
+	Vec2 getCoordinate();
+	void setCoordinate(Vec2 vec);
 };
 

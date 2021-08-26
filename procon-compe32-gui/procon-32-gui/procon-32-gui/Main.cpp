@@ -6,7 +6,7 @@ void Main()
 	TextureControl tc;
 	while (System::Update())
 	{
-		tc.showBoard();
 		tc.checkSelectFlag();
+		tc.showBoard();
 	}
 }

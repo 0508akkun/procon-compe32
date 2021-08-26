@@ -8,7 +8,7 @@ TexturePiece::TexturePiece(Texture texture, int32 x, int32 y, int32 wh)
 	y(y),
 	pieceWH(wh)
 {
-	pieceTexture = texture(x, y, pieceWH, pieceWH);
+	pieceTexture = texture(x * pieceWH, y * pieceWH, pieceWH, pieceWH);
 	piece = Rect();
 }
 
@@ -60,7 +60,16 @@ TextureRegion TexturePiece::getPieceTexture() {
 	return pieceTexture;
 }
 
-Rect TexturePiece::getPiece(int32 y,int32 x) {
+Rect TexturePiece::getPiece() {
 	piece = Rect((pieceWH + 10) * x + imageOffsetX, (pieceWH + 10) * y + imageOffsetY, pieceWH, pieceWH);
 	return piece;
+}
+
+Vec2 TexturePiece::getCoordinate() {
+	return Vec2(x, y);
+}
+
+void TexturePiece::setCoordinate(Vec2 vec) {
+	x = vec.x;
+	y = vec.y;
 }

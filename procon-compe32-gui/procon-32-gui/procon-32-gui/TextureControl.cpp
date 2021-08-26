@@ -62,7 +62,7 @@ TextureControl::TextureControl()
     //pieceÇÃê∂ê¨
     for (int32 i = 0; i < verDiviNum; i++) {
         for (int32 j = 0; j < horDiviNum; j++) {
-            board << TexturePiece(texture, pieceWH * j, pieceWH * i, pieceWH);
+            board << TexturePiece(texture, j, i, pieceWH);
             pieceID << horDiviNum * i + j;
         }
     }
@@ -97,13 +97,16 @@ void TextureControl::checkSelectFlag()
 
 void TextureControl::pieceSwap(Array<TexturePiece> &bo, Array<int32> id, int32 source, int32 to)
 {
+    Vec2 vec = bo[source].getCoordinate();
+    bo[source].setCoordinate(bo[to].getCoordinate());
+    bo[to].setCoordinate(vec);
     std::swap(bo[source], bo[to]);
     std::swap(id[source], id[to]);
 }
 
 Array<int32> TextureControl::setPieceID()
 {
-	return pieceID;
+    return pieceID;
 }
 
 void TextureControl::showBoard()
@@ -112,10 +115,10 @@ void TextureControl::showBoard()
         for (int32 j = 0; j < horDiviNum; j++) {
             board[i * horDiviNum + j].setSelectFlag();
             if (board[i * horDiviNum + j].getSelectFlag()) {
-                board[i * horDiviNum + j].getPiece(i, j)(board[i * horDiviNum + j].getPieceTexture()).draw().drawFrame(0, 3, Palette::Orange);
+                board[i * horDiviNum + j].getPiece()(board[i * horDiviNum + j].getPieceTexture()).draw().drawFrame(0, 3, Palette::Orange);
             }
             else {
-                board[i * horDiviNum + j].getPiece(i, j)(board[i * horDiviNum + j].getPieceTexture()).draw();
+                board[i * horDiviNum + j].getPiece()(board[i * horDiviNum + j].getPieceTexture()).draw();
             }
         }
     }
