@@ -12,33 +12,31 @@ TexturePiece::TexturePiece(Texture texture, int32 x, int32 y, int32 wh)
 	piece = Rect();
 }
 
-void TexturePiece::setSelectFlag()
+bool TexturePiece::getSelectFlag()
 {
-	selectFlag = true;
+	return selectFlag;
 }
 
-void TexturePiece::liftSelectFlag()
-{
+void TexturePiece::liftSelectFlag() {
 	selectFlag = false;
 }
 
-bool TexturePiece::checkSelectFlag()
+void TexturePiece::setSelectFlag()
 {
 	if (piece.leftClicked()) {
 		Print << U"Click";
 		if (selectFlag) {
-			liftSelectFlag();
+			selectFlag = false;
 		}
 		else{
-			setSelectFlag();
+			selectFlag = true;
 		}
 	}
-	return selectFlag;
 }
 
 void TexturePiece::turnRight()
 {
-	pieceTexture.rotated(90_deg);
+	piece.rotated(90_deg);
 	if (rotatedNum < 3) {
 		rotatedNum++;
 	}
@@ -49,7 +47,7 @@ void TexturePiece::turnRight()
 
 void TexturePiece::turnLeft()
 {
-	pieceTexture.rotated(-90_deg);
+	piece.rotated(-90_deg);
 	if (rotatedNum > 0) {
 		rotatedNum--;
 	}
@@ -58,7 +56,7 @@ void TexturePiece::turnLeft()
 	}
 }
 
-TextureRegion TexturePiece::showPieceTexture() {
+TextureRegion TexturePiece::getPieceTexture() {
 	return pieceTexture;
 }
 

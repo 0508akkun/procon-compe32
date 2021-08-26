@@ -15,9 +15,12 @@ class TextureControl
 	Image image;	//‰æ‘œ‚»‚Ì‚à‚Ì
 	int32 pieceWH;
 	Texture texture;
+	bool swapFlag;
 public:
 	TextureControl();
-	void pieceSwap();
+	void checkSelectFlag();
+	void rotatedPiece(Array<TexturePiece>& bo, Array<int32> swapNum);
+	void pieceSwap(Array<TexturePiece>& bo, Array<int32> id, int32 source, int32 to);
 	Array<int32> setPieceID();
 	void showBoard();
 };

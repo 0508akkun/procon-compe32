@@ -63,13 +63,42 @@ TextureControl::TextureControl()
     for (int32 i = 0; i < verDiviNum; i++) {
         for (int32 j = 0; j < horDiviNum; j++) {
             board << TexturePiece(texture, pieceWH * j, pieceWH * i, pieceWH);
+            pieceID << horDiviNum * i + j;
         }
     }
+    swapFlag = false;
 }
 
-void TextureControl::pieceSwap()
+void TextureControl::checkSelectFlag()
 {
+    int32 count = 0;
+    Array<int32> swapNum;
+    for (int i = 0; i < horDiviNum * verDiviNum; i++) {
+        if (board[i].getSelectFlag()) {
+            swapNum << pieceID[i];
+            count++;
+        }
+        if (swapNum.size() == 2) {
+            pieceSwap(board, pieceID, swapNum[0], swapNum[1]);
+            board[swapNum[0]].liftSelectFlag();
+            board[swapNum[1]].liftSelectFlag();
+            swapNum.clear();
+            return;
+        }
+    }
+    if (count == 0) {
+        return;
+    }
+    else {
+        rotatedPiece(board, swapNum);
+    }
+    return;
+}
 
+void TextureControl::pieceSwap(Array<TexturePiece> &bo, Array<int32> id, int32 source, int32 to)
+{
+    std::swap(bo[source], bo[to]);
+    std::swap(id[source], id[to]);
 }
 
 Array<int32> TextureControl::setPieceID()
@@ -81,12 +110,25 @@ void TextureControl::showBoard()
 {
     for (int32 i = 0; i < verDiviNum; i++) {
         for (int32 j = 0; j < horDiviNum; j++) {
-            if (board[i * horDiviNum + j].checkSelectFlag()) {
-                board[i * horDiviNum + j].getPiece(i, j)(board[i * horDiviNum + j].showPieceTexture()).draw().drawFrame(0, 3, Palette::Orange);
+            board[i * horDiviNum + j].setSelectFlag();
+            if (board[i * horDiviNum + j].getSelectFlag()) {
+                board[i * horDiviNum + j].getPiece(i, j)(board[i * horDiviNum + j].getPieceTexture()).draw().drawFrame(0, 3, Palette::Orange);
             }
             else {
-                board[i * horDiviNum + j].getPiece(i, j)(board[i * horDiviNum + j].showPieceTexture()).draw();
+                board[i * horDiviNum + j].getPiece(i, j)(board[i * horDiviNum + j].getPieceTexture()).draw();
             }
         }
+    }
+}
+
+void TextureControl::rotatedPiece(Array<TexturePiece>& bo, Array<int32> swapNum)
+{
+    if (KeyA.down()) {
+        bo[swapNum[0]].turnLeft();
+        bo[swapNum[0]].liftSelectFlag();
+    }
+    if (KeyD.down()) {
+        bo[swapNum[0]].turnRight();
+        bo[swapNum[0]].liftSelectFlag();
     }
 }

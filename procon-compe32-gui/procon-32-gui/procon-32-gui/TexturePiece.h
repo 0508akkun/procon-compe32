@@ -11,14 +11,14 @@ class TexturePiece
 	int32 x, y;	//ピースの位置
 	int32 imageOffsetX = 10;	//端に寄り過ぎると選択した時に色が見えなくなるためオフセットを作成
 	int32 imageOffsetY = 10;
-	void setSelectFlag();	//ピースを選択状態にする
-	void liftSelectFlag();	//ピースの選択状態を解除する
-	void turnRight();	//ピースを右に回転させる
-	void turnLeft();	//ピースを左に回転させる
 public:
 	TexturePiece(Texture texture, int32 x, int32 y, int32 wh);
-	TextureRegion showPieceTexture();	//ピースを表示する
+	void turnRight();	//ピースを右に回転させる
+	void turnLeft();	//ピースを左に回転させる
+	bool getSelectFlag();
+	void liftSelectFlag();
+	void setSelectFlag();	//ピースを選択状態にする
+	TextureRegion getPieceTexture();	//ピースを表示する
 	Rect getPiece(int32 y, int32 x);
-	bool checkSelectFlag();	//選択されているか確認する
 };
 
