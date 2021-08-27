@@ -8,5 +8,9 @@ void Main()
 	{
 		tc.checkSelectFlag();
 		tc.showBoard();
+		if (SimpleGUI::Button(U"ピースの出力", Vec2(550, 100)))
+		{
+			Print << tc.getPieceID();
+		}
 	}
 }

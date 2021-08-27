@@ -18,20 +18,20 @@ TextureControl::TextureControl()
     Array<String> pixelData;
 
     // 行数の表示用のカウント
-    size_t i = 0;
+    size_t count = 0;
 
     // 終端に達するまで 1 行ずつ読み込む
     while (reader.readLine(line))
     {
         //ヘッダ部のコメントを読み取る
-        if (i > 5) {
+        if (count > 5) {
             pixelData << line;
         }
         //画像データを読み取る
         else {
             headerData << line;
         }
-        i++;
+        count++;
     }
     //このままだと画像データが配列になっているので一旦1つの文字列に変換
     for (const auto& pixelLine : pixelData) {
@@ -62,8 +62,7 @@ TextureControl::TextureControl()
     //pieceの生成
     for (int32 i = 0; i < verDiviNum; i++) {
         for (int32 j = 0; j < horDiviNum; j++) {
-            board << TexturePiece(texture, j, i, pieceWH);
-            pieceID << horDiviNum * i + j;
+            board << TexturePiece(texture, horDiviNum * i + j, Vec2(j, i), pieceWH);
         }
     }
     swapFlag = false;
@@ -75,14 +74,11 @@ void TextureControl::checkSelectFlag()
     Array<int32> swapNum;
     for (int i = 0; i < horDiviNum * verDiviNum; i++) {
         if (board[i].getSelectFlag()) {
-            swapNum << pieceID[i];
+            swapNum << i;
             count++;
         }
         if (swapNum.size() == 2) {
-            pieceSwap(board, pieceID, swapNum[0], swapNum[1]);
-            board[swapNum[0]].liftSelectFlag();
-            board[swapNum[1]].liftSelectFlag();
-            swapNum.clear();
+            pieceSwap(board, swapNum[0], swapNum[1]);
             return;
         }
     }
@@ -95,18 +91,23 @@ void TextureControl::checkSelectFlag()
     return;
 }
 
-void TextureControl::pieceSwap(Array<TexturePiece> &bo, Array<int32> id, int32 source, int32 to)
+void TextureControl::pieceSwap(Array<TexturePiece> &bo, int32 source, int32 to)
 {
     Vec2 vec = bo[source].getCoordinate();
     bo[source].setCoordinate(bo[to].getCoordinate());
     bo[to].setCoordinate(vec);
     std::swap(bo[source], bo[to]);
-    std::swap(id[source], id[to]);
+    bo[source].liftSelectFlag();
+    bo[to].liftSelectFlag();
 }
 
-Array<int32> TextureControl::setPieceID()
+Array<int32> TextureControl::getPieceID()
 {
-    return pieceID;
+    Array<int32> idList;
+    for (auto& piece : board) {
+        idList << piece.getPieceID();
+    }
+    return idList;
 }
 
 void TextureControl::showBoard()
@@ -128,10 +129,8 @@ void TextureControl::rotatedPiece(Array<TexturePiece>& bo, Array<int32> swapNum)
 {
     if (KeyA.down()) {
         bo[swapNum[0]].turnLeft();
-        bo[swapNum[0]].liftSelectFlag();
     }
     if (KeyD.down()) {
         bo[swapNum[0]].turnRight();
-        bo[swapNum[0]].liftSelectFlag();
     }
 }

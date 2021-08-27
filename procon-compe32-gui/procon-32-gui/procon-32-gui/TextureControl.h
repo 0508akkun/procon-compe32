@@ -4,7 +4,6 @@
 class TextureControl
 {
 	Array<TexturePiece> board;	//ピース全体の集合
-	Array<int32> pieceID;	//ピースの固有ID(最初の並びがどうなっているか)
 	int32 selectCost;	//選択コスト
 	int32 changeCost;	//交換コスト
 	int32 selectLimitNum;	//選択限界回数
@@ -20,8 +19,8 @@ public:
 	TextureControl();
 	void checkSelectFlag();
 	void rotatedPiece(Array<TexturePiece>& bo, Array<int32> swapNum);
-	void pieceSwap(Array<TexturePiece>& bo, Array<int32> id, int32 source, int32 to);
-	Array<int32> setPieceID();
+	void pieceSwap(Array<TexturePiece>& bo, int32 source, int32 to);
+	Array<int32> getPieceID();
 	void showBoard();
 };
 

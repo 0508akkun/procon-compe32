@@ -1,14 +1,14 @@
 #include "TexturePiece.h"
 
-TexturePiece::TexturePiece(Texture texture, int32 x, int32 y, int32 wh)
+TexturePiece::TexturePiece(Texture texture, int32 id, Vec2 p, int32 wh)
 	:
 	selectFlag(false),
+	pieceID(id),
 	rotatedNum(0),
-	x(x),
-	y(y),
+	pos(p),
 	pieceWH(wh)
 {
-	pieceTexture = texture(x * pieceWH, y * pieceWH, pieceWH, pieceWH);
+	pieceTexture = texture(pos.x * pieceWH, pos.y * pieceWH, pieceWH, pieceWH);
 	piece = Quad();
 }
 
@@ -24,7 +24,7 @@ void TexturePiece::liftSelectFlag() {
 void TexturePiece::setSelectFlag()
 {
 	if (piece.leftClicked()) {
-		Print << U"Click";
+		Print << pieceID;
 		if (selectFlag) {
 			selectFlag = false;
 		}
@@ -59,15 +59,19 @@ TextureRegion TexturePiece::getPieceTexture() {
 }
 
 Quad TexturePiece::getPiece() {
-	piece = Rect((pieceWH + 10) * x + imageOffsetX, (pieceWH + 10) * y + imageOffsetY, pieceWH, pieceWH).rotated(90_deg * rotatedNum);
+	piece = Rect((pieceWH + 10) * pos.x + imageOffsetX, (pieceWH + 10) * pos.y + imageOffsetY, pieceWH, pieceWH).rotated(90_deg * rotatedNum);
 	return piece;
 }
 
 Vec2 TexturePiece::getCoordinate() {
-	return Vec2(x, y);
+	return pos;
 }
 
 void TexturePiece::setCoordinate(Vec2 vec) {
-	x = vec.x;
-	y = vec.y;
+	pos = vec;
+}
+
+int32 TexturePiece::getPieceID()
+{
+	return pieceID;
 }
