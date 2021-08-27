@@ -4,7 +4,7 @@
 class TexturePiece
 {
 	TextureRegion pieceTexture;	//ピースのテクスチャ
-	Rect piece;
+	Quad piece;
 	bool selectFlag;	//ピースが選択されているか
 	int32 rotatedNum;	//回転情報
 	int32 pieceWH;	//ピースの縦横の大きさ(正方形)
@@ -19,7 +19,7 @@ public:
 	void liftSelectFlag();
 	void setSelectFlag();	//ピースを選択状態にする
 	TextureRegion getPieceTexture();	//ピースを表示する
-	Rect getPiece();
+	Quad getPiece();
 	Vec2 getCoordinate();
 	void setCoordinate(Vec2 vec);
 };

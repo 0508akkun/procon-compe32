@@ -9,7 +9,7 @@ TexturePiece::TexturePiece(Texture texture, int32 x, int32 y, int32 wh)
 	pieceWH(wh)
 {
 	pieceTexture = texture(x * pieceWH, y * pieceWH, pieceWH, pieceWH);
-	piece = Rect();
+	piece = Quad();
 }
 
 bool TexturePiece::getSelectFlag()
@@ -36,7 +36,6 @@ void TexturePiece::setSelectFlag()
 
 void TexturePiece::turnRight()
 {
-	piece.rotated(90_deg);
 	if (rotatedNum < 3) {
 		rotatedNum++;
 	}
@@ -47,7 +46,6 @@ void TexturePiece::turnRight()
 
 void TexturePiece::turnLeft()
 {
-	piece.rotated(-90_deg);
 	if (rotatedNum > 0) {
 		rotatedNum--;
 	}
@@ -60,8 +58,8 @@ TextureRegion TexturePiece::getPieceTexture() {
 	return pieceTexture;
 }
 
-Rect TexturePiece::getPiece() {
-	piece = Rect((pieceWH + 10) * x + imageOffsetX, (pieceWH + 10) * y + imageOffsetY, pieceWH, pieceWH);
+Quad TexturePiece::getPiece() {
+	piece = Rect((pieceWH + 10) * x + imageOffsetX, (pieceWH + 10) * y + imageOffsetY, pieceWH, pieceWH).rotated(90_deg * rotatedNum);
 	return piece;
 }
 
