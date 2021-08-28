@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{20361b0c-8861-4704-9636-04b81dc82b7c}</ProjectGuid>
+    <ProjectGuid>{9a30ad92-2d08-427a-8520-d579cfcf2f73}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>procon_compe32_gui</RootNamespace>
+    <RootNamespace>procon_32_gui</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -109,6 +109,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="TextureControl.cpp" />
+    <ClCompile Include="TexturePiece.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="App\engine\texture\box-shadow\128.png" />
@@ -233,6 +235,10 @@
     <None Include="App\example\shader\2d\swirl.hlsl">
       <FileType>Document</FileType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="TextureControl.h" />
+    <ClInclude Include="TexturePiece.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
