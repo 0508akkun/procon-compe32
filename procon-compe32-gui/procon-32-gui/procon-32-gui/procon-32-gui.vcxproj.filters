@@ -114,6 +114,9 @@
     <ClCompile Include="Piece.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Edge.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="App\icon.ico">
@@ -398,6 +401,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Piece.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Edge.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

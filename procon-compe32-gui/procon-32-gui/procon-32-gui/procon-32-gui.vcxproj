@@ -108,6 +108,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Edge.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Piece.cpp" />
     <ClCompile Include="Solver.cpp" />
@@ -239,6 +240,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Edge.h" />
     <ClInclude Include="Piece.h" />
     <ClInclude Include="Solver.h" />
     <ClInclude Include="TextureControl.h" />

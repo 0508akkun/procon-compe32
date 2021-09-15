@@ -10,14 +10,14 @@ Piece::Piece(int32 pi, Array<int32> ei, Array<Array<Color>> epd)
     edgeBaseDiff = calcEdgeBaseDiff();
 }
 
-Array<int32> Piece::calcEdgeBaseDiff()   //基準となる色との差を取る事で比較的近い色を持った端の部分が配列の隣同士になりやすくなるはず
+Array<std::pair<int32, int32>> Piece::calcEdgeBaseDiff()   //基準となる色との差を取る事で比較的近い色を持った端の部分が配列の隣同士になりやすくなるはず
 {
-    Array<int32> result;
+    Array<std::pair<int32, int32>> result;
     Array<Color> grayArray(edgePixelData.size(), Color(127, 127, 127));   //何か基準となる色と比較する事で近いであろう端の色を持つピースを割り出す
     for (int32 i = 0; i < edgeIndex.size(); i++){
         for (int32 j = 0; j < grayArray.size(); j++) {
             //下の式は基準の色との差なので絶対値はいらない？(要検証)
-            result << grayArray[j].r - edgePixelData[i][j].r + grayArray[j].g - edgePixelData[i][j].g + grayArray[i].b - edgePixelData[i][j].b;
+            result << std::make_pair(grayArray[j].r - edgePixelData[i][j].r + grayArray[j].g - edgePixelData[i][j].g + grayArray[i].b - edgePixelData[i][j].b, edgeIndex[i]);
         }
     }
     return result;
@@ -38,7 +38,7 @@ Array<Array<Color>> Piece::getEdgePixelData()
     return edgePixelData;
 }
 
-Array<int32> Piece::getEdgeBaseDiff()
+Array<std::pair<int32, int32>> Piece::getEdgeBaseDiff()
 {
     return edgeBaseDiff;
 }

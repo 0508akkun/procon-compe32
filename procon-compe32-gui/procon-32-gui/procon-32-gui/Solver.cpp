@@ -2,7 +2,6 @@
 
 Solver::Solver(Image image, int32 WH, int32 horDivNum, int32 verDivNum)
     :pieceWH(WH) {
-    Array<Array<Color>> edgePixelData;
     Array<Color> edgePixel;
     //端の画素データを取得
     for (int32 y = 0; y < image.height(); y++) {    //横に探索していく
@@ -37,38 +36,59 @@ Solver::Solver(Image image, int32 WH, int32 horDivNum, int32 verDivNum)
             board << Piece(y * horDivNum + x, edgeIndex, Array<Array<Color>> {edgePixelData[edgeIndex[0]], edgePixelData[edgeIndex[1]], edgePixelData[edgeIndex[2]], edgePixelData[edgeIndex[3]]});
         }
     }
+    graph = Array<Array<int32>>(board.size());
 }
 
-Array<Array<std::tuple<int32, PieceInfo, PieceInfo>>> Solver::searchConnectPiece(int32 index)  //indexで指定されたピースについて探索
+Array<std::pair<int32, int32>> Solver::getBaseDiffList()
 {
-    Array<Array<std::tuple<int32, PieceInfo, PieceInfo>>> resultList;
-    for (int32 i = 0; i < board[index].getEdgePixelData().size(); i++) {    //指定されたピースの中に存在するエッジを全探索
-        Array<std::tuple<int32, PieceInfo, PieceInfo>> result;
-        for (int32 j = 0; j < board.size(); j++) {  //ピース同士を探索
-            if (j == index)break;   //同じピースは探索しない
-            for(int32 k = 0; k < board[j].getEdgePixelData().size(); k++){  //他のエッジと比較する時に他のエッジとの差をピース単位で纏めて返してしまうので分解
-                result << std::make_tuple(board[j].calcEdgeDiff(board[index].getEdgePixelData()[i])[k], PieceInfo(board[j].getPieceId(), board[j].getEdgeIndex()[k]), PieceInfo(board[index].getPieceId(), board[index].getEdgeIndex()[k])); //指定されたエッジと他のエッジとの差、指定されたエッジと比較したエッジはどのエッジなのか、指定されたエッジと比較したエッジはどのピースに属するのか
-            }
+    Array<std::pair<int32, int32>> edgeBaseDiff;
+    for (int32 i = 0; i < board.size(); i++) {
+        Array<std::pair<int32, int32>> edgeBaseDiffList = board[i].getEdgeBaseDiff();
+        for (int32 j = 0; j < edgeBaseDiffList.size(); j++) {
+            edgeBaseDiff << edgeBaseDiffList[j];
         }
-        if (!result.isEmpty()) {
-            std::sort(result.begin(), result.end());
-            result.resize(5);
-            resultList << result;
+    }
+    edgeBaseDiff.sort();
+    return edgeBaseDiff;
+}
+
+Array<std::pair<int32, int32>> Solver::classifyPiece()  //ピースをグループに分ける
+{
+    Array<std::pair<int32, int32>> baseDiffList = getBaseDiffList();
+    for (int32 i = 0; i < baseDiffList.size(); i++) {
+        Array<std::pair<int32, int32>> candiList;
+        if (i < 5) {
+            std::copy(baseDiffList.begin(), baseDiffList.begin() + i + 5, candiList.begin());
         }
+        else if (i > baseDiffList.size() - 6) {
+            std::copy(baseDiffList.begin() + i - 5, baseDiffList.end(), candiList.begin());
+        }
+        else {
+            std::copy(baseDiffList.begin() + i - 5, baseDiffList.begin() + i + 5, baseDiffList.begin());
+        }
+        searchConnectPiece(candiList, baseDiffList[i].second);
     }
     return resultList;    //戻り値に
 }
 
-void Solver::connectPiece()
+void Solver::searchConnectPiece(Array<std::pair<int32, int32>> cl, int32 index)
 {
-    Array<Array<std::tuple<int32, PieceInfo, PieceInfo>>> scoreList;    //各エッジの差を記録しておく配列
-    for (int32 i = 0; i < board.size(); i++) {
-        Array<Array<std::tuple<int32, PieceInfo, PieceInfo>>> result = searchConnectPiece(i);
-        for (int32 j = 0; j < result.size(); j++) {
-            scoreList << result[j];
+    Array<std::tuple<int32, int32, int32>> scoreList;
+    for (int32 i = 0; i < cl.size(); i++) {
+        if (cl[i].second == index)break;    //同じピースでの比較は無視
+        for (int32 j = 0; j < edgePixelData[0].size(); j++) {
+            scoreList << std::make_tuple(Abs(edgePixelData[cl[i].second][j].r - edgePixelData[index][j].r) + Abs(edgePixelData[cl[i].second][j].g - edgePixelData[index][j].g) + Abs(edgePixelData[cl[i].second][j].b - edgePixelData[index][j].b), index, cl[i].second);
+            Array<Color> rEdgePixelData = edgePixelData[cl[i].second].reversed();
+            scoreList << std::make_tuple(Abs(rEdgePixelData[j].r - edgePixelData[index][j].r) + Abs(rEdgePixelData[j].g - edgePixelData[index][j].g) + Abs(rEdgePixelData[j].b - edgePixelData[index][j].b), index, cl[i].second);
         }
     }
-    std::sort(scoreList.begin(), scoreList.end());
+    scoreList.sort();
+    graph[std::get<1>(scoreList[0])] << std::get<2>(scoreList[0]);
+}
+
+void Solver::connectPiece()
+{
+    
 }
 
 PieceInfo::PieceInfo(int32 pi, int32 ei)
