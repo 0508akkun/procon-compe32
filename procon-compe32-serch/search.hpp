@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 #include <deque>
 #include <utility>
 #include "data.hpp"

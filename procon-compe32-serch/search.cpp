@@ -17,19 +17,23 @@ bool Check(board state)
 int Eval(State state)
 {   
     int score = 0;
-    for (int i = 0; i < NumOfDiv::Horizontal; i++)
+    for (int y = 0; y <= NumOfDiv::Horizontal; y++)
     {
-        for (int k = 0; k < NumOfDiv::Vertical; k++)
+        for (int x = 0; x <= NumOfDiv::Vertical; x++)
         {
-            if(state.status[k][i] == (NumOfDiv::Vertical+1)*i+(k+1)) score++;
+            int correctX = (state.status[x][y]-1)%(NumOfDiv::Vertical+1);
+            int correctY = (state.status[x][y]-1)/(NumOfDiv::Vertical+1);
+            int dist = abs(x - correctX) + abs(y - correctY);
+            score += dist;
         }
     }
+    std::cout << "score: " << score << std::endl;
     return score;
 }
 
 bool Comp(std::pair<int, State> lhs, std::pair<int, State> rhs)
 {
-    return lhs.first > rhs.first;
+    return lhs.first < rhs.first;
 }
 
 bool Find(std::vector<board> vec, board a)
@@ -47,6 +51,7 @@ bool Find(std::vector<board> vec, board a)
 
 void BeamSearch(State initialState, int selectCostRate, int swapCostRate)
 {
+    std::cout << initialState.status[initialState.selectPieceX][initialState.selectPieceY] << std::endl;
     std::deque<std::pair<int, State>> beam;
     std::deque<std::pair<int, State>> nexts;
 
@@ -56,8 +61,6 @@ void BeamSearch(State initialState, int selectCostRate, int swapCostRate)
 
     while (!beam.empty())
     {
-        std::cout << '\n' << beam.size() << std::endl;
-        std::cout << nexts.size() << std::endl;
         state = beam.front();
         beam.pop_front();
         if (Check(state.second.status)) break;
@@ -67,7 +70,6 @@ void BeamSearch(State initialState, int selectCostRate, int swapCostRate)
         SwapWithU(newState.second.status, newState.second.selectPieceX, newState.second.selectPieceY);
         newState.second.cost += swapCostRate;
         newState.second.result.push_back('U');
-        std::cout << "U ";
         newState.first = Eval(newState.second);
         nexts.push_back(newState);
         newState = state;
@@ -75,7 +77,6 @@ void BeamSearch(State initialState, int selectCostRate, int swapCostRate)
         SwapWithD(newState.second.status, newState.second.selectPieceX, newState.second.selectPieceY);
         newState.second.cost += swapCostRate;
         newState.second.result.push_back('D');
-        std::cout << "D ";
         newState.first = Eval(newState.second);
         nexts.push_back(newState);
         newState = state;
@@ -83,7 +84,6 @@ void BeamSearch(State initialState, int selectCostRate, int swapCostRate)
         SwapWithR(newState.second.status, newState.second.selectPieceX, newState.second.selectPieceY);
         newState.second.cost += swapCostRate;
         newState.second.result.push_back('R');
-        std::cout << "R ";
         newState.first = Eval(newState.second);
         nexts.push_back(newState);
         newState = state;
@@ -91,7 +91,6 @@ void BeamSearch(State initialState, int selectCostRate, int swapCostRate)
         SwapWithL(newState.second.status, newState.second.selectPieceX, newState.second.selectPieceY);
         newState.second.cost += swapCostRate;
         newState.second.result.push_back('L');
-        std::cout << "L" << std::endl;
         newState.first = Eval(newState.second);
         nexts.push_back(newState);
         newState = state;

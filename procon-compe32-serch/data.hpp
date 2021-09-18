@@ -18,7 +18,7 @@ struct State {
       : numOfselect(_numOfselect),
         cost(0),
         selectPieceX(0),
-        selectPieceY(1),
+        selectPieceY(0),
         status(_status)
     { }
 };
