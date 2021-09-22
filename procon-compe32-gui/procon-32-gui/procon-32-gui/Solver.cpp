@@ -39,10 +39,8 @@ Solver::Solver(Image image, int32 WH, int32 hdn, int32 vdn)
             board << Piece(y * horDivNum + x, edgeIndex, Array<Array<Color>> {edgePixelData[edgeIndex[0]], edgePixelData[edgeIndex[1]], edgePixelData[edgeIndex[2]], edgePixelData[edgeIndex[3]]});
         }
     }
-    graph = Array<Array<int32>>(board.size());  //エッジ分の領域を取る
     graphMemo = Array<int32>(board.size(), -1);
-    prevPath = Array<int32>(Min(vdn, hdn), -1);
-    resultArray = Array<Array<int32>>(verDivNum, Array<int32>(horDivNum, -1));
+    resultArray = Array<Array<std::pair<int32, int32>>>(verDivNum, Array<std::pair<int32, int32>>(horDivNum, std::make_pair(-1, 0)));
 }
 
 Array<std::pair<int32, PieceInfo>> Solver::getBaseDiffList()
@@ -58,8 +56,9 @@ Array<std::pair<int32, PieceInfo>> Solver::getBaseDiffList()
     return edgeBaseDiff;
 }
 
-Array<std::pair<int32, int32>> Solver::classifyPiece()  //ピースをグループに分ける
+Array<Array<std::pair<int32, int32>>> Solver::solveImage()
 {
+    //ピースをグループに分ける
     Array<std::pair<int32, PieceInfo>> baseDiffList = getBaseDiffList();
     Array<std::tuple<int32, PieceInfo, PieceInfo>> connectList;
     for (int32 i = 0; i < baseDiffList.size(); i++) {
@@ -77,8 +76,156 @@ Array<std::pair<int32, int32>> Solver::classifyPiece()  //ピースをグループに分け
     }
     std::sort(connectList.begin(), connectList.end());
     connectList.resize(connectList.size() - (horDivNum * 2 + verDivNum * 2));
-    connectPiece(connectList);
-    return resultList;    //戻り値に
+    //ピースを探索する
+    //connectPiece(connectList);
+    int32 x = horDivNum / 2;
+    int32 y = verDivNum / 2;
+    resultArray[y][x] = std::make_pair(0, 0);
+    for (int32 i = 0; i < connectList.size(); i++) {
+        if (std::get<1>(connectList[i]).pieceId == 0) {
+            if (std::get<1>(connectList[i]).edgeIndex % (horDivNum * 2) < horDivNum && std::get<1>(connectList[i]).edgeIndex < horDivNum * verDivNum * 2) {
+                dfs(connectList, i, graphMemo, resultArray, x, y, 0);
+            }
+            else if (std::get<1>(connectList[i]).edgeIndex % (horDivNum * 2) >= horDivNum && std::get<1>(connectList[i]).edgeIndex < horDivNum * verDivNum * 2) {
+                dfs(connectList, i, graphMemo, resultArray, x, y, 2);
+            }
+            if (std::get<1>(connectList[i]).edgeIndex % (horDivNum * 2) < horDivNum && std::get<1>(connectList[i]).edgeIndex >= horDivNum * verDivNum * 2) {
+                dfs(connectList, i, graphMemo, resultArray, x, y, 3);
+            }
+            else {
+                dfs(connectList, i, graphMemo, resultArray, x, y, 1);
+            }
+        }
+    }
+    return resultArray;    //戻り値に
+}
+
+void Solver::dfs(Array<std::tuple<int32, PieceInfo, PieceInfo>> cl, int32 index, Array<int32>& gm, Array<Array<std::pair<int32, int32>>>& ra, int32& x, int32& y, int32 rt)
+{
+    int32 edgeFromNum = std::get<1>(cl[index]).edgeIndex;   //比較元のエッジ番号
+    int32 idFromNum = std::get<1>(cl[index]).pieceId;   //比較元のインデックス番号
+    int32 edgeToNum = std::get<2>(cl[index]).edgeIndex; //比較先のエッジ番号
+    int32 idToNum = std::get<2>(cl[index]).pieceId; //比較先のインデックス番号
+    if (gm[idToNum] == 1) return; //探索先は探索済み
+    gm[idFromNum] = 1;    //現在居る場所を探索済みに
+    //ピースidが0のピースが向きが正しいのでその向きを基準に
+    if (edgeFromNum % (horDivNum * 2) < horDivNum && edgeFromNum < horDivNum * verDivNum * 2) {
+        for (int32 i= 0; i < cl.size(); i++) {
+            if (std::get<1>(cl[i]).edgeIndex == edgeToNum) {    //比較先のエッジ番号を候補の中から探す
+                moveResultData(cl[i], ra, x, y, rt);
+                dfs(cl, i, gm, ra, x, y, rt);
+                break;
+            }
+        }
+    }
+    else if(edgeFromNum % (horDivNum * 2) >= horDivNum && edgeFromNum < horDivNum * verDivNum * 2) {
+        int32 rotated = rt + 2;
+        if (rotated >= 4) {
+            rotated %= 4;
+        }
+        for (int32 i = 0; i < cl.size(); i++) {
+            if (std::get<1>(cl[i]).edgeIndex == edgeToNum) {
+                moveResultData(cl[i], ra, x, y, rotated);
+                dfs(cl, i, gm, ra, x, y, rotated);
+                break;
+            }
+        }
+    }
+    else if (edgeFromNum % (verDivNum * 2) < verDivNum && edgeFromNum >= horDivNum * verDivNum * 2) {
+        int32 rotated = rt + 3;
+        if (rotated >= 4) {
+            rotated %= 4;
+        }
+        for (int32 i = 0; i < cl.size(); i++) {
+            if (std::get<1>(cl[i]).edgeIndex == edgeToNum) {
+                moveResultData(cl[i], ra, x, y, rotated);
+                dfs(cl, i, gm, ra, x, y, rotated);
+                break;
+            }
+        }
+    }
+    else {
+        int32 rotated = rt + 1;
+        if (rotated >= 4) {
+            rotated %= 4;
+        }
+        for (int32 i = 0; i < cl.size(); i++) {
+            if (std::get<1>(cl[i]).edgeIndex == edgeToNum) {
+                moveResultData(cl[i], ra, x, y, rotated);
+                dfs(cl, i, gm, ra, x, y, rotated);
+                break;
+            }
+        }
+    }
+    return;
+}
+
+void Solver::moveResultData(const std::tuple<int32, PieceInfo, PieceInfo>& cl, Array<Array<std::pair<int32, int32>>>& ra, int32& x, int32& y,const int32 rt)
+{
+    if (rt == 0) {  
+        if (y <= 0) {   //上に猶予が無い時
+            for (int32 i = ra.size() - 1; i >= 0; i--) {
+                for (int32 j = 0; j < ra[i].size();j++) {
+                    if (i + 1 < ra.size()) {
+                        ra[i + 1][j] = ra[i][j];
+                    }
+                }
+            }
+            ra[0][x] = std::make_pair(std::get<2>(cl).pieceId, rt); //挿入する形になるので現在位置は更新しない
+        }
+        else {
+            y--;
+            ra[y][x] = std::make_pair(std::get<2>(cl).pieceId, rt); //位置を更新して記録する
+        }
+    }
+    else if (rt == 1) { 
+        if (x >= ra[y].size()) {    //右に猶予が無い時
+            for (int32 i = 0; i < ra.size(); i++) {
+                for (int32 j = 0; j < ra[i].size(); j++) {
+                    if (j - 1 >= 0) {
+                        ra[i][j - 1] = ra[i][j];
+                    }
+                }
+            }
+            ra[y][ra[y].size() - 1] = std::make_pair(std::get<2>(cl).pieceId, rt);  //挿入する形になるので現在位置は更新しない
+        }
+        else {
+            x++;
+            ra[y][x] = std::make_pair(std::get<2>(cl).pieceId, rt); //位置を更新して記録する
+        }
+    }
+    else if (rt == 2) { 
+        if (y >= ra.size()) {   //下に猶予が無い時
+            for (int32 i = 0; i < ra.size(); i++) {
+                for (int32 j = 0; j < ra[i].size(); j++) {
+                    if (i - 1 >= 0) {
+                        ra[i - 1][j] = ra[i][j];
+                    }
+                }
+            }
+            ra[ra.size() - 1][x] = std::make_pair(std::get<2>(cl).pieceId, rt); //挿入する形になるので現在位置は更新しない
+        }
+        else {
+            y++;
+            ra[y][x] = std::make_pair(std::get<2>(cl).pieceId, rt); //位置を更新して記録する
+        }
+    }
+    else {  
+        if (x <= 0) {   //左に猶予が無い時
+            for (int32 i = 0; ra.size(); i++) {
+                for (int32 j = ra[y].size() - 1; j >= 0; j--) {
+                    if (j + 1 < ra[y].size()) {
+                        ra[i][j + 1] = ra[i][j];
+                    }
+                }
+            }
+            ra[y][0] = std::make_pair(std::get<2>(cl).pieceId, rt); //挿入する形になるので現在位置は更新しない
+        }
+        else {
+            x--;
+            ra[y][x] = std::make_pair(std::get<2>(cl).pieceId, rt); //位置を更新して記録する
+        }
+    }
 }
 
 std::tuple<int32, PieceInfo, PieceInfo> Solver::searchConnectPiece(Array<std::pair<int32, PieceInfo>> cl, PieceInfo bl)
@@ -94,102 +241,6 @@ std::tuple<int32, PieceInfo, PieceInfo> Solver::searchConnectPiece(Array<std::pa
     }
     std::sort(scoreList.begin(), scoreList.end());
     return scoreList[0];
-}
-
-void Solver::connectPiece(Array<std::tuple<int32, PieceInfo, PieceInfo>> cl)
-{
-    int32 cornerIndex = -1; //隅に存在するピースのインデックスを記録する
-    int32 secondCornerIndex = -1;
-    int32 subCornerIndex = -1;  //隅に存在するピースが見つからない時は1つのピースが連結している時に限り隅のインデックスに認定
-    for (int32 i = 0; i < cl.size(); i++) {
-        graph[std::get<1>(cl[i]).pieceId] << std::get<2>(cl[i]).pieceId;
-    }
-    for (int32 i = 0; i < graph.size(); i++) {
-        if (graph[i].size() == 2) {
-            cornerIndex = i;
-            break;
-        }
-        if (graph[i].size() == 1) {
-            subCornerIndex = i;
-        }
-    }
-    if (cornerIndex != -1) {
-        secondCornerIndex = cornerDfs(cornerIndex, 0, graphMemo, prevPath);
-    }
-    else if(subCornerIndex != -1) {
-        secondCornerIndex = cornerDfs(subCornerIndex, 0, graphMemo, prevPath);
-    }
-    else {
-        secondCornerIndex = -1;
-        Print << U"正常にコーナーが検出できていません";
-    }
-    graphMemo = Array<int32>(board.size(), -1);
-    for (int32 i = 0; i < prevPath.size(); i++) {
-        graphMemo[prevPath[i]] = 1;
-    }
-    if (horDivNum <= verDivNum) {
-        for (int32 i = 1; i < horDivNum; i++) { //起点となる辺のインデックスを確定させる
-            resultArray[0][i] = prevPath[i];
-        }
-        for (int32 i = 0; i < verDivNum; i++) {
-            Array<int32> searchArray(horDivNum, -1);
-            for (int32 j = 1; j < horDivNum; j++) {
-                searchArray = indexDfs(resultArray[i][j], 0, graphMemo, prevPath, searchArray);
-                resultArray[i][j] = searchArray[j];
-            }
-        }
-    }
-    else {
-        for (int32 i = 0; i < verDivNum; i++) {
-            resultArray[i][0] = prevPath[i];
-        }
-        for (int32 i = 0; i < horDivNum; i++) {
-            Array<int32> searchArray(verDivNum, -1);
-            for (int32 j = 1; j < verDivNum; j++) {
-                searchArray = indexDfs(resultArray[j][i], 0, graphMemo, prevPath, searchArray);
-                resultArray[j][i] = searchArray[j];
-            }
-        }
-    }
-}
-
-int32 Solver::cornerDfs(int32 index, int32 depth, Array<int32> &gm, Array<int32> &pp)   //画像全体の短い辺を構成するピースを探索する
-{
-    int32 cornerIndex = -1;
-    int32 returnValue = -1;
-    if (gm[index] != -1)return;  //検索済みならば無視
-    if (depth == Min(horDivNum, verDivNum)) {   //最短のピースの分割数より深さが深くなった後にもう一つの隅は見つかっても隣り合う隅では無いのでその前に探索を終了
-        return -1;
-    }
-    gm[index] = 1;   //探索済みにする
-    pp[depth] = index;    //どのような経路を辿ったか保存
-    if (graph[index].size() < 2 && depth == Min(horDivNum, verDivNum) - 1) {  //隅を見つけた場合、インデックスを戻り値に
-        return index;
-    }
-    for (int32 i = 0; i < graph[index].size(); i++) {
-        returnValue = cornerDfs(graph[index][i], depth++, gm, pp);  //隅のインデックスを見つける
-        if (returnValue > -1) { //見つけられたら
-            cornerIndex = returnValue;  //その隅を2つ目の隅と認定
-            return cornerIndex; //その値を返却する
-        }
-    }
-    return cornerIndex; //答えを返却する
-}
-
-Array<int32> Solver::indexDfs(int32 index, int32 depth, Array<int32>& gm, Array<int32>& pp, Array<int32>& sa)    //インデックスがどこにあるのか判定する
-{
-    Array<int32> result;
-    if (gm[index] != -1)return sa;
-    if (depth == Min(horDivNum, verDivNum) + 1)return sa;
-    gm[index] = 1;  //探索済みにする
-    for (int32 i = 0; i < graph[index].size(); i++) {
-        if (pp[depth - 1] == graph[index][i]) {
-            sa[depth - 1] = index;  // resultArrayに結果を記録する
-            result = indexDfs(graph[index][i], depth++, gm, pp, sa);
-            return result;
-        }
-    }
-    return result;
 }
 
 PieceInfo::PieceInfo(int32 pi, int32 ei)
