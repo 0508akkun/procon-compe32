@@ -12,5 +12,10 @@ void Main()
 		{
 			Print << tc.getPieceID();
 		}
+		if (SimpleGUI::Button(U"ソルバの実行", Vec2(550, 150)))
+		{
+			Print << U"BG";
+			tc.setSolverData();
+		}
 	}
 }

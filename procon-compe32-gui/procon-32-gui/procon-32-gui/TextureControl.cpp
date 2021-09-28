@@ -1,4 +1,5 @@
 #include "TextureControl.h"
+#include "Solver.h"
 
 TextureControl::TextureControl()
 {
@@ -120,6 +121,40 @@ void TextureControl::showBoard()
             }
             else {
                 board[i * horDiviNum + j].getPiece()(board[i * horDiviNum + j].getPieceTexture()).draw();
+            }
+        }
+    }
+}
+
+void TextureControl::setSolverData()
+{
+    Solver s = Solver(image, pieceWH, horDiviNum, verDiviNum);
+    Array<Array<std::pair<int32, int32>>> result = s.solveImage();
+    moveSolverResult(board, result);
+}
+
+void TextureControl::moveSolverResult(Array<TexturePiece>& bo, Array<Array<std::pair<int32, int32>>>& result)
+{
+    for (int32 i = 0; i < result.size(); i++) {
+        for (int32 j = 0; j < result[i].size(); j++) {
+            if (bo[i * horDiviNum + j].getPieceID() != result[i][j].first) {
+                for (int32 k = i * horDiviNum + j; k < bo.size(); k++) {
+                    if (bo[k].getPieceID() == result[i][j].first) {
+                        pieceSwap(bo, k, i * horDiviNum + j);    //元のピースの配列をソルバが解いた通りに並べ直す
+                    }
+                    if (result[i][j].second == 1) { //回転も反映する
+                        bo[i * horDiviNum + j].turnLeft();
+                    }
+                    else if (result[i][j].second == 2) {
+                        bo[i * horDiviNum + j].turnLeft();
+                        bo[i * horDiviNum + j].turnLeft();
+                    }
+                    else if (result[i][j].second == 3) {
+                        bo[i * horDiviNum + j].turnRight();
+                    }
+                    else {
+                    }
+                }
             }
         }
     }

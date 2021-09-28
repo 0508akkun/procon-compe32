@@ -1,11 +1,22 @@
 #include "Piece.h"
 
+//デフォルトコンストラクタ
+PieceInfo::PieceInfo() {
+
+}
+
+PieceInfo::PieceInfo(int32 pi, int32 ei)
+    :pieceId(pi),
+    edgeIndex(ei)
+{
+}
+
 Piece::Piece(int32 pi, Array<int32> ei, Array<Array<Color>> epd)
     :pieceId(pi),
      edgeIndex(ei)
 {
-    for (int32 i = 0; i < ei.size(); i++) {
-        edgePixelData << epd[ei[i]];
+    for (int32 i = 0; i < epd.size(); i++) {
+        edgePixelData << epd[i];
     }
     edgeBaseDiff = calcEdgeBaseDiff();
 }

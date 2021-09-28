@@ -4,6 +4,7 @@
 struct PieceInfo {
 	int32 pieceId;
 	int32 edgeIndex;
+	PieceInfo();
 	PieceInfo(int32 pi, int32 ei);
 };
 
