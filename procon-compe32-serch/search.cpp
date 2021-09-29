@@ -32,6 +32,7 @@ std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordi
     std::deque<std::pair<int, State>> beam;
     std::deque<std::pair<int, State>> nexts;
 
+    FindDistance(initialState, correctCoordinate);
     Select(initialState);
 
     std::pair<int, State> state(Eval(initialState), initialState);

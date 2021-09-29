@@ -29,7 +29,7 @@ int main()
     for (int i = 0; i < numOfDivH; i++) {
         for (int k = 0; k < numOfDivV; k++) {
             std::cin >> status[k][i];
-            init[k][i] = k + i * numOfDivH;
+            init[k][i] = k + i * numOfDivV;
         }
     }
     for (int i = 0; i < numOfDivH; i++) {
@@ -50,6 +50,12 @@ int main()
     for (int i = 0; i <= NumOfDiv::Horizontal; i++) {
         for (int k = 0; k <= NumOfDiv::Vertical; k++) {
             std::cout << status[k][i] << " ";
+        }
+        std::cout << "\n";
+    }
+    for (int i = 0; i <= NumOfDiv::Horizontal; i++) {
+        for (int k = 0; k <= NumOfDiv::Vertical; k++) {
+            std::cout << init[k][i] << " ";
         }
         std::cout << "\n";
     }
