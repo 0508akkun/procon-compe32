@@ -4,10 +4,13 @@
 
 void Output(std::string result, std::string rotate)
 {
-    std::vector<std::string> line;
-    std::vector<Coordinate> selectCoordinate;
-    std::vector<std::string> move;
+
+    std::vector<std::string> line;              //行ごとに取り出す
+    std::vector<Coordinate> selectCoordinate;   //選択ピースの座標
+    std::vector<std::string> move;              //交換操作
     int prev = 0;
+
+    //改行で分割する
     for (int i = 0; i < result.size(); i++)
     {
         if (result[i] == '\n')
@@ -17,8 +20,10 @@ void Output(std::string result, std::string rotate)
         }
     }
     for (auto i : line) std::cout << i << std::endl;
+    //2行ずづ取り出していく
     for (int i = 0; i < line.size(); i += 2)
     {
+        //選択したピースの座標
         Coordinate coordinate;
         std::string str = line[i];
         for (int k = 0; k < str.size(); k++)
@@ -31,9 +36,11 @@ void Output(std::string result, std::string rotate)
                 break;
             }
         }
+        //交換操作
         move.push_back(line[i+1]);
     }
 
+    //ファイルに出力
     std::string output = "";
     output += rotate + '\n';
     output += std::to_string(selectCoordinate.size()) + '\n';

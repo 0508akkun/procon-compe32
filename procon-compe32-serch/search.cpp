@@ -4,6 +4,7 @@ const int BeamWidth = 1024;
 
 bool Check(State state)
 {
+    //正しい座標までの距離がすべて0か調べる
     for (int i = 0; i <= NumOfDiv::Horizontal; i++)
     {
         for (int k = 0; k <= NumOfDiv::Vertical; k++)
@@ -16,10 +17,12 @@ bool Check(State state)
 
 bool Check2(State state)
 {
+    //選択しているピースが正しい座標にあるか調べる
     if (state.distance[state.selectPieceX][state.selectPieceY] == 0) return true;
     else return false;
 }
 
+//Pairの比較用関数
 bool Comp(std::pair<int, State> lhs, std::pair<int, State> rhs)
 {
     return lhs.first < rhs.first;
@@ -29,22 +32,27 @@ std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordi
 {
     int itr = 0;
 
+    //ビームサーチのキュー
     std::deque<std::pair<int, State>> beam;
     std::deque<std::pair<int, State>> nexts;
 
     FindDistance(initialState, correctCoordinate);
     Select(initialState);
 
+    //評価値と盤面のPair
     std::pair<int, State> state(Eval(initialState), initialState);
 
     beam.push_front(state);
 
+    //キューがからになるまでループ
     while (!beam.empty())
     {
         itr++;
         state = beam.front();
         beam.pop_front();
+        //すべて正しい座標にあれば終了
         if (Check(state.second)) break;
+        //選択しているピースが正しい座標にあれば選択を変える
         if (Check2(state.second) && state.second.numOfselect > 0) 
         {
             ChangeSelection(state.second);
@@ -52,7 +60,7 @@ std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordi
         }
 
         std::pair<int, State> newState(state);
-
+        //それぞれの方向と交換させる
         SwapWithU(newState.second.status, newState.second.selectPieceX, newState.second.selectPieceY);
         FindDistance(newState.second, correctCoordinate);
         newState.second.cost += swapCostRate;
@@ -84,7 +92,7 @@ std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordi
         newState.first = Eval(newState.second);
         nexts.push_back(newState);
         newState = state;
-
+        //キューが空になったら次のイテレーション用のキューからビーム幅取り出す
         if (beam.empty())
         {
             std::sort(nexts.begin(), nexts.end(), Comp);
@@ -113,6 +121,7 @@ std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordi
         }
     }
 
+    //結果の表示
     if (Check(state.second))
     {
         for (int i = 0; i <= NumOfDiv::Horizontal; i++) {
@@ -135,6 +144,7 @@ std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordi
 
 void Select(State& state)
 {
+    //一番正しい座標から離れているピースを選択する
     int maxDist = 0;
     int maxX = 0;
     int maxY = 0;

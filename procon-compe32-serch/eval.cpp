@@ -1,5 +1,6 @@
 #include "eval.hpp"
 
+//評価関数(スコアが小さい方が良い)
 int Eval(State state)
 {   
     int score = 0;
@@ -12,6 +13,7 @@ int Eval(State state)
     }
     score += state.cost;
     score -= 5 * state.numOfselect;
+    //同じ状態に戻る動作は不要
     for (int i = 0; i < state.result.size()-1; i++)
     {
         if (state.result.substr(i, 2) == "RL" || state.result.substr(i, 2) == "LR" || state.result.substr(i, 2) == "UD" || state.result.substr(i, 2) == "DU")
