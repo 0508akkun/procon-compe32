@@ -1,34 +1,23 @@
 #include "search.hpp"
 
-const int BeamWidth = 16;
+const int BeamWidth = 1024;
 
-bool Check(board state)
+bool Check(State state)
 {
     for (int i = 0; i <= NumOfDiv::Horizontal; i++)
     {
         for (int k = 0; k <= NumOfDiv::Vertical; k++)
         {
-            if(state[k][i] != (NumOfDiv::Vertical+1)*i+(k+1)) return false;
+            if(state.distance[k][i] != 0) return false;
         }
     }
     return true;
 }
 
-int Eval(State state)
-{   
-    int score = 0;
-    for (int y = 0; y <= NumOfDiv::Horizontal; y++)
-    {
-        for (int x = 0; x <= NumOfDiv::Vertical; x++)
-        {
-            int correctX = (state.status[x][y]-1)%(NumOfDiv::Vertical+1);
-            int correctY = (state.status[x][y]-1)/(NumOfDiv::Vertical+1);
-            int dist = abs(x - correctX) + abs(y - correctY);
-            score += dist;
-        }
-    }
-    std::cout << "score: " << score << std::endl;
-    return score;
+bool Check2(State state)
+{
+    if (state.distance[state.selectPieceX][state.selectPieceY] == 0) return true;
+    else return false;
 }
 
 bool Comp(std::pair<int, State> lhs, std::pair<int, State> rhs)
@@ -36,24 +25,14 @@ bool Comp(std::pair<int, State> lhs, std::pair<int, State> rhs)
     return lhs.first < rhs.first;
 }
 
-bool Find(std::vector<board> vec, board a)
+void BeamSearch(State initialState, std::vector<Coordinate> correctCoordinate, int selectCostRate, int swapCostRate)
 {
-    auto itr = std::find(vec.begin(), vec.end(), a);
-    if (itr == vec.end())
-    {
-        return false;
-    }
-    else 
-    {
-        return true;
-    }
-}
+    int itr = 0;
 
-void BeamSearch(State initialState, int selectCostRate, int swapCostRate)
-{
-    std::cout << initialState.status[initialState.selectPieceX][initialState.selectPieceY] << std::endl;
     std::deque<std::pair<int, State>> beam;
     std::deque<std::pair<int, State>> nexts;
+
+    Select(initialState);
 
     std::pair<int, State> state(Eval(initialState), initialState);
 
@@ -61,36 +40,46 @@ void BeamSearch(State initialState, int selectCostRate, int swapCostRate)
 
     while (!beam.empty())
     {
+        itr++;
         state = beam.front();
         beam.pop_front();
-        if (Check(state.second.status)) break;
+        if (Check(state.second)) break;
+        if (Check2(state.second) && state.second.numOfselect > 0) 
+        {
+            ChangeSelection(state.second);
+            state.second.cost += selectCostRate;
+        }
 
         std::pair<int, State> newState(state);
 
         SwapWithU(newState.second.status, newState.second.selectPieceX, newState.second.selectPieceY);
+        FindDistance(newState.second, correctCoordinate);
         newState.second.cost += swapCostRate;
-        newState.second.result.push_back('U');
+        newState.second.result += 'U';
         newState.first = Eval(newState.second);
         nexts.push_back(newState);
         newState = state;
 
         SwapWithD(newState.second.status, newState.second.selectPieceX, newState.second.selectPieceY);
+        FindDistance(newState.second, correctCoordinate);
         newState.second.cost += swapCostRate;
-        newState.second.result.push_back('D');
+        newState.second.result += 'D';
         newState.first = Eval(newState.second);
         nexts.push_back(newState);
         newState = state;
 
         SwapWithR(newState.second.status, newState.second.selectPieceX, newState.second.selectPieceY);
+        FindDistance(newState.second, correctCoordinate);
         newState.second.cost += swapCostRate;
-        newState.second.result.push_back('R');
+        newState.second.result += 'R';
         newState.first = Eval(newState.second);
         nexts.push_back(newState);
         newState = state;
 
         SwapWithL(newState.second.status, newState.second.selectPieceX, newState.second.selectPieceY);
+        FindDistance(newState.second, correctCoordinate);
         newState.second.cost += swapCostRate;
-        newState.second.result.push_back('L');
+        newState.second.result += 'L';
         newState.first = Eval(newState.second);
         nexts.push_back(newState);
         newState = state;
@@ -106,9 +95,23 @@ void BeamSearch(State initialState, int selectCostRate, int swapCostRate)
             }
             nexts.clear();
         }
+
+        if (itr == 1000)
+        {
+            std::cout << "Select: " << state.second.status[state.second.selectPieceX][state.second.selectPieceY] << std::endl;
+            for (int i = 0; i <= NumOfDiv::Horizontal; i++) {
+                for (int k = 0; k <= NumOfDiv::Vertical; k++) {
+                    std::cout << state.second.status[k][i] << "(" << state.second.distance[k][i] << ")" << " ";
+                }
+                std::cout << std::endl;
+            }
+            std::cout << state.second.result << std::endl;
+            std::cout << "-----------------------" << std::endl;
+            itr = 0;
+        }
     }
 
-    if (Check(state.second.status))
+    if (Check(state.second))
     {
         for (int i = 0; i <= NumOfDiv::Horizontal; i++) {
             for (int k = 0; k <= NumOfDiv::Vertical; k++) {
@@ -124,4 +127,49 @@ void BeamSearch(State initialState, int selectCostRate, int swapCostRate)
     {
         std::cout << "Not found" << std::endl;
     }
+}
+
+void Select(State& state)
+{
+    int maxDist = 0;
+    int maxX = 0;
+    int maxY = 0;
+    for (int i = 0; i <= NumOfDiv::Horizontal; i++) 
+    {
+        for (int k = 0; k <= NumOfDiv::Vertical; k++) 
+        {
+            if (state.distance[k][i] > maxDist)
+            {
+                maxDist = state.distance[k][i];
+                maxX = k;
+                maxY = i;
+            }
+        }
+    }
+    state.selectPieceX = maxX;
+    state.selectPieceY = maxY;
+    state.result += std::to_string(maxX) + " " + std::to_string(maxY) + '\n';
+}
+
+void ChangeSelection(State& state)
+{  
+    int maxDist = 0;
+    int maxX = 0;
+    int maxY = 0;
+    for (int i = 0; i <= NumOfDiv::Horizontal; i++) 
+    {
+        for (int k = 0; k <= NumOfDiv::Vertical; k++) 
+        {
+            if (state.distance[k][i] > maxDist)
+            {
+                maxDist = state.distance[k][i];
+                maxX = k;
+                maxY = i;
+            }
+        }
+    }
+    state.selectPieceX = maxX;
+    state.selectPieceY = maxY;
+    state.numOfselect--;
+    state.result += '\n' + std::to_string(maxX) + " " + std::to_string(maxY) + '\n';
 }

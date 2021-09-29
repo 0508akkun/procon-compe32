@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <string>
 
 using board = std::vector<std::vector<int>>;
 
@@ -10,16 +11,31 @@ struct State {
     int selectPieceX;
     int selectPieceY;
 
-    std::vector<char> result;
+    std::string result;
 
     board status;
+    board distance;
     
     State(int _numOfselect, board _status)
       : numOfselect(_numOfselect),
         cost(0),
         selectPieceX(0),
         selectPieceY(0),
-        status(_status)
+        status(_status),
+        distance(_status)
+    { }
+};
+
+struct Coordinate {
+    int x;
+    int y;
+
+    Coordinate()
+    { }
+
+    Coordinate(int _x, int _y)
+      : x(_x),
+        y(_y)
     { }
 };
 

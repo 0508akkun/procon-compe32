@@ -4,13 +4,16 @@
 #include <utility>
 #include "data.hpp"
 #include "swap.hpp"
+#include "eval.hpp"
 
-bool Chack(board state);
+bool Check(State state);
 
-int Eval(State state);
+bool Check2(State state);
 
 bool Comp(std::pair<int, State> lhs, std::pair<int, State> rhs);
 
-bool Find(std::vector<board> vec, board a);
+void BeamSearch(State initialState, std::vector<Coordinate> correctCoordinate, int selectCostRate, int swapCostRate);
 
-void BeamSearch(State initialState, int selectCostRate, int swapCostRate);
+void Select(State& state);
+
+void ChangeSelection(State& state);
