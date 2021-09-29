@@ -25,7 +25,7 @@ bool Comp(std::pair<int, State> lhs, std::pair<int, State> rhs)
     return lhs.first < rhs.first;
 }
 
-void BeamSearch(State initialState, std::vector<Coordinate> correctCoordinate, int selectCostRate, int swapCostRate)
+std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordinate, int selectCostRate, int swapCostRate)
 {
     int itr = 0;
 
@@ -121,13 +121,15 @@ void BeamSearch(State initialState, std::vector<Coordinate> correctCoordinate, i
             std::cout << std::endl;
         }
         std::cout << std::endl;
-        for (auto i : state.second.result) std::cout << i;
+        std::cout << state.second.result << std::endl;
         std::cout << std::endl;
     }
     else
     {
         std::cout << "Not found" << std::endl;
     }
+    state.second.result += '\n';
+    return state.second.result;
 }
 
 void Select(State& state)

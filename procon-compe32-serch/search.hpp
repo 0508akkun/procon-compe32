@@ -12,7 +12,7 @@ bool Check2(State state);
 
 bool Comp(std::pair<int, State> lhs, std::pair<int, State> rhs);
 
-void BeamSearch(State initialState, std::vector<Coordinate> correctCoordinate, int selectCostRate, int swapCostRate);
+std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordinate, int selectCostRate, int swapCostRate);
 
 void Select(State& state);
 

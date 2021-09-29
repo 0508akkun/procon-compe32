@@ -4,6 +4,7 @@
 #include "data.hpp"
 #include "search.hpp"
 #include "eval.hpp"
+#include "output.hpp"
 
 int NumOfDiv::Vertical;
 int NumOfDiv::Horizontal;
@@ -23,11 +24,19 @@ int main()
     std::vector<std::vector<int>> status(numOfDivV, std::vector<int>(numOfDivH));
     std::vector<std::vector<int>> init(numOfDivV, std::vector<int>(numOfDivH));
     std::vector<Coordinate> correctCoordiante(numOfDivH*numOfDivV);
+    std::string rotate = "";
 
     for (int i = 0; i < numOfDivH; i++) {
         for (int k = 0; k < numOfDivV; k++) {
             std::cin >> status[k][i];
             init[k][i] = k + i * numOfDivH;
+        }
+    }
+    for (int i = 0; i < numOfDivH; i++) {
+        for (int k = 0; k < numOfDivV; k++) {
+            char a;
+            std::cin >> a;
+            rotate.push_back(a);
         }
     }
 
@@ -44,10 +53,12 @@ int main()
         }
         std::cout << "\n";
     }
+    std::cout << rotate << std::endl;
     std::cout << "---------------------------------------" << std::endl;
 
     FindCorrectCoordinate(correctCoordiante, status);
 
-    BeamSearch(initialState, correctCoordiante, selectCostRate, swapCostRate);
+    std::string result = BeamSearch(initialState, correctCoordiante, selectCostRate, swapCostRate);
 
+    Output(result, rotate);
 }
