@@ -98,7 +98,8 @@ void BeamSearch(State initialState, std::vector<Coordinate> correctCoordinate, i
 
         if (itr == 1000)
         {
-            std::cout << "Select: " << state.second.status[state.second.selectPieceX][state.second.selectPieceY] << std::endl;
+            std::cout << "Select: " << state.second.status[state.second.selectPieceX][state.second.selectPieceY];
+            std::cout << " Score: " << state.first << std::endl;
             for (int i = 0; i <= NumOfDiv::Horizontal; i++) {
                 for (int k = 0; k <= NumOfDiv::Vertical; k++) {
                     std::cout << state.second.status[k][i] << "(" << state.second.distance[k][i] << ")" << " ";

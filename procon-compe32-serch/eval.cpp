@@ -7,15 +7,18 @@ int Eval(State state)
     {
         for (int x = 0; x <= NumOfDiv::Vertical; x++)
         {
-            score += state.distance[x][y];
+            score += 20 * state.distance[x][y];
         }
-    }
-    if (state.numOfselect > 0)
-    {
-        score += state.distance[state.selectPieceX][state.selectPieceY];
     }
     score += state.cost;
     score -= 5 * state.numOfselect;
+    for (int i = 0; i < state.result.size()-1; i++)
+    {
+        if (state.result.substr(i, 2) == "RL" || state.result.substr(i, 2) == "LR" || state.result.substr(i, 2) == "UD" || state.result.substr(i, 2) == "DU")
+        {
+            score += 10;
+        }
+    }
     return score;
 }
 
