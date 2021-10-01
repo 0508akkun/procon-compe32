@@ -10,11 +10,14 @@ class Solver
 	int32 verDivNum;
 	Array<int32> graphMemo;	//ˆê“x’Ê‚Á‚½Ž–‚ª‚ ‚é‚©”»’è
 	Array<Array<std::pair<int32, int32>>> resultArray;
+	Array<std::tuple<int32, int32, int32, int32>> resultData;
 	Array<std::pair<int32, PieceInfo>> getBaseDiffList();
 	Array<Array<Color>> edgePixelData;
 	std::tuple<int32, PieceInfo, PieceInfo> searchConnectPiece(Array<std::pair<int32, PieceInfo>>& cl, PieceInfo bl);
-	void dfs(Array<std::tuple<int32, PieceInfo, PieceInfo>> cl, int32 index, Array<int32>& gm, Array<Array<std::pair<int32, int32>>>& ra, int32& x, int32& y, int32 rt);
-	void moveResultData(std::tuple<int32, PieceInfo, PieceInfo>& cl, Array<Array<std::pair<int32, int32>>>& ra, int32& x, int32& y, const int32 rt);
+	void dfs(Array<std::tuple<int32, PieceInfo, PieceInfo>> cl, int32 pi, Array<int32>& gm, Array<Array<std::pair<int32, int32>>>& ra, int32 x, int32 y, int32 rt);
+	void setResultData(int32 pieceId, int32 x, int32 y, int32 rt, Array<std::tuple<int32, int32, int32, int32>>& rd);
+	void calcResultData(Array<std::tuple<int32, int32, int32, int32>> rd, Array<Array<std::pair<int32, int32>>>& ra);
+	int32 rotateConnectPiece(int32 index);
 public:
 	Solver(Image image, int32 WH, int32 hdn, int32 vdn); 
 	Array<Array<std::pair<int32, int32>>> solveImage();

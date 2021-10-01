@@ -5,7 +5,6 @@ Solver::Solver(Image image, int32 WH, int32 hdn, int32 vdn)
      horDivNum(hdn),
      verDivNum(vdn)
     {
-    Print << U"IN";
     Array<Color> edgePixel;
     //端の画素データを取得
     for (int32 y = 0; y < image.height(); y++) {    //横に探索していく
@@ -35,17 +34,18 @@ Solver::Solver(Image image, int32 WH, int32 hdn, int32 vdn)
             Array<int32> edgeIndex;
             edgeIndex << y * horDivNum + x + horDivNum * y;
             edgeIndex << y * horDivNum + x + horDivNum + horDivNum * y;
-            edgeIndex << y * horDivNum + x + horDivNum * verDivNum * 2 + (verDivNum * 2 - 1) * x - y * verDivNum;
-            edgeIndex << y * horDivNum + x + horDivNum * verDivNum * 2 + (verDivNum * 2 - 1) * x - y * verDivNum + verDivNum;
-            board << Piece(y * horDivNum + x, edgeIndex, Array<Array<Color>> {edgePixelData[edgeIndex[0]], edgePixelData[edgeIndex[1]], edgePixelData[edgeIndex[2]], edgePixelData[edgeIndex[3]]});
+            edgeIndex << horDivNum * verDivNum * 2 + y + verDivNum * x * 2;
+            edgeIndex << horDivNum * verDivNum * 2 + y + verDivNum * x * 2 + verDivNum;
+            Array<Array<Color>> epd = { edgePixelData[edgeIndex[0]], edgePixelData[edgeIndex[1]], edgePixelData[edgeIndex[2]], edgePixelData[edgeIndex[3]] };
+            board << Piece(y * horDivNum + x, edgeIndex, epd);
         }
     }
     graphMemo = Array<int32>(board.size(), -1);
-    resultArray = Array<Array<std::pair<int32, int32>>>(verDivNum, Array<std::pair<int32, int32>>(horDivNum, std::make_pair(-1, 0)));
+    resultArray = Array<Array<std::pair<int32, int32>>>(verDivNum, Array<std::pair<int32, int32>>(horDivNum, std::make_pair(0, 0)));
 }
 
 //sort比較用の関数
-bool compare_edge(std::pair<int32, PieceInfo> edge1, std::pair<int32, PieceInfo> edge2)
+bool compare_edge(std::pair<int32, PieceInfo>& edge1, std::pair<int32, PieceInfo>& edge2)
 {
     return edge1.first < edge2.first;
 }
@@ -62,10 +62,9 @@ bool compare_scoreList(const std::tuple<int32, PieceInfo, PieceInfo>& list1, con
 
 Array<std::pair<int32, PieceInfo>> Solver::getBaseDiffList()
 {
-    Print << U"BD";
     Array<std::pair<int32, PieceInfo>> edgeBaseDiff;
     for (int32 i = 0; i < board.size(); i++) {
-        Array<std::pair<int32, PieceInfo>> edgeBaseDiffList = board[i].getEdgeBaseDiff();
+        Array<std::pair<int32, PieceInfo>> edgeBaseDiffList = board[i].getEdgeBaseDiff();   //ピースそれぞれの基本色との差
         for (int32 j = 0; j < edgeBaseDiffList.size(); j++) {
             edgeBaseDiff << edgeBaseDiffList[j];
         }
@@ -76,7 +75,6 @@ Array<std::pair<int32, PieceInfo>> Solver::getBaseDiffList()
 
 Array<Array<std::pair<int32, int32>>> Solver::solveImage()
 {
-    Print << U"SI";
     //ピースをグループに分ける
     Array<std::pair<int32, PieceInfo>> baseDiffList = getBaseDiffList();
     Array<std::tuple<int32, PieceInfo, PieceInfo>> connectList;
@@ -94,171 +92,122 @@ Array<Array<std::pair<int32, int32>>> Solver::solveImage()
         connectList << searchConnectPiece(candiList, baseDiffList[i].second);
     }
     std::sort(connectList.begin(), connectList.end(), compare_connectList);
-    connectList.resize(connectList.size() - (horDivNum * 2 + verDivNum * 2));
+    /*for (int32 i = 0; i < connectList.size(); i++) {
+        Print << std::get<0>(connectList[i]) << U" " << std::get<1>(connectList[i]).pieceId << U" " << std::get<1>(connectList[i]).edgeIndex << U" " << std::get<2>(connectList[i]).pieceId << U" " << std::get<2>(connectList[i]).edgeIndex;
+    }*/
     //ピースを探索する
-    //connectPiece(connectList);
     int32 x = horDivNum / 2;
     int32 y = verDivNum / 2;
     resultArray[y][x] = std::make_pair(0, 0);
-    for (int32 i = 0; i < connectList.size(); i++) {
-        if (std::get<1>(connectList[i]).pieceId == 0) {
-            if (std::get<1>(connectList[i]).edgeIndex % (horDivNum * 2) < horDivNum && std::get<1>(connectList[i]).edgeIndex < horDivNum * verDivNum * 2) {
-                dfs(connectList, i, graphMemo, resultArray, x, y, 0);
-            }
-            else if (std::get<1>(connectList[i]).edgeIndex % (horDivNum * 2) >= horDivNum && std::get<1>(connectList[i]).edgeIndex < horDivNum * verDivNum * 2) {
-                dfs(connectList, i, graphMemo, resultArray, x, y, 2);
-            }
-            if (std::get<1>(connectList[i]).edgeIndex % (horDivNum * 2) < horDivNum && std::get<1>(connectList[i]).edgeIndex >= horDivNum * verDivNum * 2) {
-                dfs(connectList, i, graphMemo, resultArray, x, y, 3);
-            }
-            else {
-                dfs(connectList, i, graphMemo, resultArray, x, y, 1);
-            }
-        }
-    }
+    dfs(connectList, 0, graphMemo, resultArray, x, y, 0);
     return resultArray;    //戻り値に
 }
 
-void Solver::dfs(Array<std::tuple<int32, PieceInfo, PieceInfo>> cl, int32 index, Array<int32>& gm, Array<Array<std::pair<int32, int32>>>& ra, int32& x, int32& y, int32 rt)
+void Solver::dfs(Array<std::tuple<int32, PieceInfo, PieceInfo>> cl, int32 pi, Array<int32>& gm, Array<Array<std::pair<int32, int32>>>& ra, int32 x, int32 y, int32 rt)
 {
-    Print << U"DF";
-    int32 edgeFromNum = std::get<1>(cl[index]).edgeIndex;   //比較元のエッジ番号
-    int32 idFromNum = std::get<1>(cl[index]).pieceId;   //比較元のインデックス番号
-    int32 edgeToNum = std::get<2>(cl[index]).edgeIndex; //比較先のエッジ番号
-    int32 idToNum = std::get<2>(cl[index]).pieceId; //比較先のインデックス番号
-    if (gm[idToNum] == 1) return; //探索先は探索済み
-    gm[idFromNum] = 1;    //現在居る場所を探索済みに
-    //ピースidが0のピースが向きが正しいのでその向きを基準に
-    if (edgeFromNum % (horDivNum * 2) < horDivNum && edgeFromNum < horDivNum * verDivNum * 2) {
-        for (int32 i= 0; i < cl.size(); i++) {
-            if (std::get<1>(cl[i]).edgeIndex == edgeToNum) {    //比較先のエッジ番号を候補の中から探す
-                moveResultData(cl[i], ra, x, y, rt);
-                dfs(cl, i, gm, ra, x, y, rt);
-                break;
-            }
-        }
-    }
-    else if(edgeFromNum % (horDivNum * 2) >= horDivNum && edgeFromNum < horDivNum * verDivNum * 2) {
-        int32 rotated = rt + 2;
-        if (rotated >= 4) {
-            rotated %= 4;
-        }
-        for (int32 i = 0; i < cl.size(); i++) {
-            if (std::get<1>(cl[i]).edgeIndex == edgeToNum) {
-                moveResultData(cl[i], ra, x, y, rotated);
-                dfs(cl, i, gm, ra, x, y, rotated);
-                break;
-            }
-        }
-    }
-    else if (edgeFromNum % (verDivNum * 2) < verDivNum && edgeFromNum >= horDivNum * verDivNum * 2) {
-        int32 rotated = rt + 3;
-        if (rotated >= 4) {
-            rotated %= 4;
-        }
-        for (int32 i = 0; i < cl.size(); i++) {
-            if (std::get<1>(cl[i]).edgeIndex == edgeToNum) {
-                moveResultData(cl[i], ra, x, y, rotated);
-                dfs(cl, i, gm, ra, x, y, rotated);
-                break;
-            }
-        }
-    }
-    else {
-        int32 rotated = rt + 1;
-        if (rotated >= 4) {
-            rotated %= 4;
-        }
-        for (int32 i = 0; i < cl.size(); i++) {
-            if (std::get<1>(cl[i]).edgeIndex == edgeToNum) {
-                moveResultData(cl[i], ra, x, y, rotated);
-                dfs(cl, i, gm, ra, x, y, rotated);
-                break;
+    if (gm[pi] == 1) return; //探索先は探索済み
+    gm[pi] = 1;    //現在居る場所を探索済みに
+    rt %= 4;    //回転情報を0～3の範囲へ
+    setResultData(pi, x, y, rt, resultData);
+    for (int32 i = 0; i < cl.size(); i++) {
+        if (pi == std::get<1>(cl[i]).pieceId) { //目的のpieceId以外は探索しない
+            for (int32 j = 0; j < cl.size(); j++) {
+                int32 sx = x, sy = y;
+                if (std::get<0>(cl[i]) == std::get<0>(cl[j])) {
+                    if (std::get<1>(cl[i]).edgeIndex == std::get<2>(cl[j]).edgeIndex && std::get<2>(cl[i]).edgeIndex == std::get<1>(cl[j]).edgeIndex) { //互いに同じ端を参照したら
+                        if (gm[std::get<2>(cl[i]).pieceId] == 1)continue;
+                        rt += rotateConnectPiece(std::get<1>(cl[i]).edgeIndex);
+                        rt %= 4;
+                        if (rt == 0) {
+                            sy--;
+                            rt += 2;
+                        }
+                        else if (rt == 2) {
+                            sy++;
+                            rt += 2;
+                        }
+                        else if (rt == 3) {
+                            sx--;
+                        }
+                        else {
+                            sx++;
+                        }
+                        rt += rotateConnectPiece(std::get<2>(cl[i]).edgeIndex);
+                        dfs(cl, std::get<2>(cl[i]).pieceId, gm, ra, sx, sy, rt);
+                        break;
+                    }
+                }
             }
         }
     }
     return;
 }
 
-void Solver::moveResultData(std::tuple<int32, PieceInfo, PieceInfo>& cl, Array<Array<std::pair<int32, int32>>>& ra, int32& x, int32& y,const int32 rt)
+void Solver::setResultData(int32 pieceId, int32 x, int32 y, int32 rt, Array<std::tuple<int32, int32, int32, int32>>& rd)
 {
-    Print << U"MR";
-    if (rt == 0) {  
-        if (y <= 0) {   //上に猶予が無い時
-            for (int32 i = ra.size() - 1; i >= 0; i--) {
-                for (int32 j = 0; j < ra[i].size();j++) {
-                    if (i + 1 < ra.size()) {
-                        ra[i + 1][j] = ra[i][j];
-                    }
-                }
-            }
-            ra[0][x] = std::make_pair(std::get<2>(cl).pieceId, rt); //挿入する形になるので現在位置は更新しない
-        }
-        else {
-            y--;
-            ra[y][x] = std::make_pair(std::get<2>(cl).pieceId, rt); //位置を更新して記録する
-        }
+    rd << std::make_tuple(x, y, pieceId, rt);
+}
+
+void Solver::calcResultData(Array<std::tuple<int32, int32, int32, int32>> rd, Array<Array<std::pair<int32, int32>>>& ra)
+{
+    std::sort(rd.begin(), rd.end());
+    for (int32 i = 0; i < rd.size(); i++) {
+        std::get<0>(rd[i]) -= std::get<0>(rd[0]);
+        std::get<1>(rd[i]) -= std::get<1>(rd[0]);
     }
-    else if (rt == 1) { 
-        if (x >= ra[y].size()) {    //右に猶予が無い時
-            for (int32 i = 0; i < ra.size(); i++) {
-                for (int32 j = 0; j < ra[i].size(); j++) {
-                    if (j - 1 >= 0) {
-                        ra[i][j - 1] = ra[i][j];
-                    }
+    for (int32 i = 0; i < ra.size(); i++) {
+        for (int32 j = 0; j < ra[i].size(); j++) {
+            for (int32 k = 0; k < rd.size(); i++) {
+                if (std::get<1>(rd[k]) >= 0 && std::get<1>(rd[k]) < verDivNum && std::get<0>(rd[k]) >= 0 && std::get<0>(rd[k]) < horDivNum) {
+                    ra[std::get<1>(rd[k])][std::get<0>(rd[k])] = std::make_pair(std::get<2>(rd[k]), std::get<3>(rd[k]));
                 }
             }
-            ra[y][ra[y].size() - 1] = std::make_pair(std::get<2>(cl).pieceId, rt);  //挿入する形になるので現在位置は更新しない
-        }
-        else {
-            x++;
-            ra[y][x] = std::make_pair(std::get<2>(cl).pieceId, rt); //位置を更新して記録する
-        }
-    }
-    else if (rt == 2) { 
-        if (y >= ra.size()) {   //下に猶予が無い時
-            for (int32 i = 0; i < ra.size(); i++) {
-                for (int32 j = 0; j < ra[i].size(); j++) {
-                    if (i - 1 >= 0) {
-                        ra[i - 1][j] = ra[i][j];
-                    }
-                }
-            }
-            ra[ra.size() - 1][x] = std::make_pair(std::get<2>(cl).pieceId, rt); //挿入する形になるので現在位置は更新しない
-        }
-        else {
-            y++;
-            ra[y][x] = std::make_pair(std::get<2>(cl).pieceId, rt); //位置を更新して記録する
-        }
-    }
-    else {  
-        if (x <= 0) {   //左に猶予が無い時
-            for (int32 i = 0; ra.size(); i++) {
-                for (int32 j = ra[y].size() - 1; j >= 0; j--) {
-                    if (j + 1 < ra[y].size()) {
-                        ra[i][j + 1] = ra[i][j];
-                    }
-                }
-            }
-            ra[y][0] = std::make_pair(std::get<2>(cl).pieceId, rt); //挿入する形になるので現在位置は更新しない
-        }
-        else {
-            x--;
-            ra[y][x] = std::make_pair(std::get<2>(cl).pieceId, rt); //位置を更新して記録する
         }
     }
 }
 
 
+
+int32 Solver::rotateConnectPiece(int32 index)   //edgeIndexからどの方向を見てるのか推測する
+{
+    if (index % (horDivNum * 2) < horDivNum && index < horDivNum * verDivNum * 2) { //比較前のエッジ番号が初期で上側の場合
+        return 0;
+    }
+    else if (index % (horDivNum * 2) >= horDivNum && index < horDivNum * verDivNum * 2) {    //比較前のエッジ番号が初期で下側の場合
+        return 2;
+    }
+    else if (index % (verDivNum * 2) < verDivNum && index >= horDivNum * verDivNum * 2) {   //比較前のエッジ番号が初期で左側の場合
+        return 3;
+    }
+    else {
+        return 1;
+    }
+}
+
 std::tuple<int32, PieceInfo, PieceInfo> Solver::searchConnectPiece(Array<std::pair<int32, PieceInfo>>& cl, PieceInfo bl)
 {
     Array<std::tuple<int32, PieceInfo, PieceInfo>> scoreList;
     for (int32 i = 0; i < cl.size(); i++) {
-        for (int32 j = 0; j < edgePixelData[cl[i].second.edgeIndex].size(); j++) {
-            if (cl[i].second.pieceId == bl.pieceId)break;    //同じピースでの比較は無視
-            scoreList << std::make_tuple(Abs(edgePixelData[cl[i].second.edgeIndex][j].r - edgePixelData[bl.edgeIndex][j].r) + Abs(edgePixelData[cl[i].second.edgeIndex][j].g - edgePixelData[bl.edgeIndex][j].g) + Abs(edgePixelData[cl[i].second.edgeIndex][j].b - edgePixelData[bl.edgeIndex][j].b), PieceInfo(bl.pieceId, bl.edgeIndex), PieceInfo(cl[i].second.pieceId, cl[i].second.edgeIndex));
-            Array<Color> rEdgePixelData = edgePixelData[cl[i].second.edgeIndex].reversed();
-            scoreList << std::make_tuple(Abs(rEdgePixelData[j].r - edgePixelData[bl.edgeIndex][j].r) + Abs(rEdgePixelData[j].g - edgePixelData[bl.edgeIndex][j].g) + Abs(rEdgePixelData[j].b - edgePixelData[bl.edgeIndex][j].b), PieceInfo(bl.pieceId, bl.edgeIndex), PieceInfo(cl[i].second.pieceId, cl[i].second.edgeIndex)); 
+        if (cl[i].second.pieceId != bl.pieceId) {    //同じピースでの比較は無視
+            for (int32 j = 0; j < edgePixelData[cl[i].second.edgeIndex].size(); j++) {
+                //なぜか画素の値の絶対値が取れないので代入し直す
+                int32 absValueR = edgePixelData[cl[i].second.edgeIndex][j].r - edgePixelData[bl.edgeIndex][j].r;
+                absValueR = Abs(absValueR);
+                int32 absValueG = edgePixelData[cl[i].second.edgeIndex][j].g - edgePixelData[bl.edgeIndex][j].g;
+                absValueG = Abs(absValueG);
+                int32 absValueB = edgePixelData[cl[i].second.edgeIndex][j].b - edgePixelData[bl.edgeIndex][j].b;
+                absValueB = Abs(absValueB);
+                int32 absValue = absValueR + absValueG + absValueB;
+                Array<Color> rEdgePixelData = edgePixelData[cl[i].second.edgeIndex].reversed();
+                absValueR = rEdgePixelData[j].r - edgePixelData[bl.edgeIndex][j].r;
+                absValueR = Abs(absValueR);
+                absValueG = rEdgePixelData[j].g - edgePixelData[bl.edgeIndex][j].g;
+                absValueG = Abs(absValueG);
+                absValueB = rEdgePixelData[j].b - edgePixelData[bl.edgeIndex][j].b;
+                absValueB = Abs(absValueB);
+                int32 absRevValue = absValueR + absValueG + absValueB;
+                scoreList << std::make_tuple(Min(absValue, absRevValue), PieceInfo(bl.pieceId, bl.edgeIndex), PieceInfo(cl[i].second.pieceId, cl[i].second.edgeIndex));
+            }
         }
     }
     std::sort(scoreList.begin(), scoreList.end(), compare_scoreList);

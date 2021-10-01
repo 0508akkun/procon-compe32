@@ -4,19 +4,18 @@
 TextureControl::TextureControl()
 {
     // ファイルをオープンする
-    TextReader reader(U"../../../images/windmillnum.ppm");
+    TextReader reader(U"../../../../procon32_sample/windmillnum.ppm");
 
     // オープンに失敗
     if (!reader)
     {
-        throw Error(U"Failed to open `test.txt`");
+        throw Error(U"Failed to open `ppm`");
     }
 
     // 行の内容を読み込む変数
     String line;
     String pixelValue = U"";
     Array<String> headerData;
-    Array<String> pixelData;
 
     // 行数の表示用のカウント
     size_t count = 0;
@@ -24,19 +23,17 @@ TextureControl::TextureControl()
     // 終端に達するまで 1 行ずつ読み込む
     while (reader.readLine(line))
     {
-        //ヘッダ部のコメントを読み取る
-        if (count > 5) {
-            pixelData << line;
+        if (line != U"#"){
+            //画像データを読み取る
+            if (count > 5) {
+                pixelValue += line;
+            }
+            //ヘッダ部のコメントを読み取る
+            else {
+                headerData << line;
+            }
+            count++;
         }
-        //画像データを読み取る
-        else {
-            headerData << line;
-        }
-        count++;
-    }
-    //このままだと画像データが配列になっているので一旦1つの文字列に変換
-    for (const auto& pixelLine : pixelData) {
-        pixelValue += pixelLine;
     }
     //ヘッダ部のコメントの情報を数値に変換
     Array<String> diviNum = headerData[1].split(U' ');
@@ -63,7 +60,7 @@ TextureControl::TextureControl()
     //pieceの生成
     for (int32 i = 0; i < verDiviNum; i++) {
         for (int32 j = 0; j < horDiviNum; j++) {
-            board << TexturePiece(texture, horDiviNum * i + j, Vec2(j, i), pieceWH);
+            board << TexturePiece(texture, horDiviNum * i + j, Vec2(j, i), pieceWH, imageWidth, imageHeight);
         }
     }
     swapFlag = false;
@@ -129,32 +126,91 @@ void TextureControl::showBoard()
 void TextureControl::setSolverData()
 {
     Solver s = Solver(image, pieceWH, horDiviNum, verDiviNum);
-    Array<Array<std::pair<int32, int32>>> result = s.solveImage();
-    moveSolverResult(board, result);
+    result = s.solveImage();
+    for (int32 i = 0; i < result.size(); i++) {
+        for (int32 j = 0; j < result[i].size(); j++) {
+            Print << result[i][j].first << U" " << result[i][j].second;
+        }
+    }
+    //moveSolverResult(board, result);
+    Print << U"Solve";
+}
+
+void TextureControl::writeResultText()
+{
+    String headData = U"";
+    Array<String> indexData(result.size(), U"");
+    Array<String> rotateData(result.size(), U"");
+    TextWriter writer(U"../../../../procon32_sample/resultdata.txt");
+    if (!writer) {
+        throw Error(U"Failed to open text output file");
+    }
+    headData += Format(horDiviNum);
+    headData += U" ";
+    headData += Format(verDiviNum);
+    headData += U" ";
+    headData += Format(selectLimitNum);
+    headData += U" ";
+    headData += Format(selectCost);
+    headData += U" ";
+    headData += Format(changeCost);
+    writer.writeln(headData);
+    writer.writeln(U"");
+    for (int32 i = 0; i < result.size(); i++) {
+        for (int32 j = 0; j < result[i].size(); j++) {
+            indexData[i] += Format(board[i * horDiviNum + j].getPieceID());
+            indexData[i] += U" ";
+        }
+        writer.writeln(indexData[i]);
+    }
+    writer.writeln(U"");
+    for (int32 i = 0; i < result.size(); i++) {
+        for (int32 j = 0; j < result[i].size(); j++) {
+            if (result[i][j].second == 1) { //回転も反映する
+                rotateData[i] += Format(board[i * horDiviNum + j].getRotate());
+                rotateData[i] += U" ";
+            }
+            else if (result[i][j].second == 2) {
+                rotateData[i] += Format(board[i * horDiviNum + j].getRotate());
+                rotateData[i] += U" ";
+            }
+            else if (result[i][j].second == 3) {
+                rotateData[i] += Format(board[i * horDiviNum + j].getRotate());
+                rotateData[i] += U" ";
+            }
+            else {
+                rotateData[i] += Format(board[i * horDiviNum + j].getRotate());
+                rotateData[i] += U" ";
+            }
+        }
+        writer.writeln(rotateData[i]);
+    }
 }
 
 void TextureControl::moveSolverResult(Array<TexturePiece>& bo, Array<Array<std::pair<int32, int32>>>& result)
 {
     for (int32 i = 0; i < result.size(); i++) {
         for (int32 j = 0; j < result[i].size(); j++) {
-            if (bo[i * horDiviNum + j].getPieceID() != result[i][j].first) {
-                for (int32 k = i * horDiviNum + j; k < bo.size(); k++) {
-                    if (bo[k].getPieceID() == result[i][j].first) {
-                        pieceSwap(bo, k, i * horDiviNum + j);    //元のピースの配列をソルバが解いた通りに並べ直す
-                    }
-                    if (result[i][j].second == 1) { //回転も反映する
-                        bo[i * horDiviNum + j].turnLeft();
-                    }
-                    else if (result[i][j].second == 2) {
-                        bo[i * horDiviNum + j].turnLeft();
-                        bo[i * horDiviNum + j].turnLeft();
-                    }
-                    else if (result[i][j].second == 3) {
-                        bo[i * horDiviNum + j].turnRight();
-                    }
-                    else {
-                    }
+            for (int32 k = 0; k < bo.size(); k++) {
+                if (bo[k].getPieceID() == result[i][j].first && k != i * horDiviNum + j) {
+                    pieceSwap(bo, k, i * horDiviNum + j);    //元のピースの配列をソルバが解いた通りに並べ直す
                 }
+            }
+        }
+    }
+    for (int32 i = 0; i < result.size(); i++) {
+        for (int32 j = 0; j < result[i].size(); j++) {
+            if (result[i][j].second == 1) { //回転も反映する
+                bo[i * horDiviNum + j].turnLeft();
+            }
+            else if (result[i][j].second == 2) {
+                bo[i * horDiviNum + j].turnLeft();
+                bo[i * horDiviNum + j].turnLeft();
+            }
+            else if (result[i][j].second == 3) {
+                bo[i * horDiviNum + j].turnRight();
+            }
+            else {
             }
         }
     }

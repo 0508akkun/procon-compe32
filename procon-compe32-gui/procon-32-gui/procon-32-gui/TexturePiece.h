@@ -11,9 +11,12 @@ class TexturePiece
 	Vec2 pos;	//ピースの位置
 	int32 imageOffsetX = 10;	//端に寄り過ぎると選択した時に色が見えなくなるためオフセットを作成
 	int32 imageOffsetY = 10;
+	int32 imageWidth;
+	int32 imageHeight;
 	int32 pieceID;
 public:
-	TexturePiece(Texture texture, int32 id, Vec2 p, int32 wh);
+	void setRotate(int32 rotate);
+	TexturePiece(Texture texture, int32 id, Vec2 p, int32 wh, int32 iw, int32 ih);
 	void turnRight();	//ピースを右に回転させる
 	void turnLeft();	//ピースを左に回転させる
 	bool getSelectFlag();
@@ -24,5 +27,6 @@ public:
 	Vec2 getCoordinate();
 	void setCoordinate(Vec2 vec);
 	int32 getPieceID();
+	int32 getRotate();
 };
 

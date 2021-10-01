@@ -14,6 +14,7 @@ class TextureControl
 	Image image;	//‰æ‘œ‚»‚Ì‚à‚Ì
 	int32 pieceWH;
 	Texture texture;
+	Array<Array<std::pair<int32, int32>>> result;
 	bool swapFlag;
 	void moveSolverResult(Array<TexturePiece>& bo, Array<Array<std::pair<int32, int32>>>& result);
 public:
@@ -24,5 +25,6 @@ public:
 	Array<int32> getPieceID();
 	void showBoard();
 	void setSolverData();
+	void writeResultText();
 };
 

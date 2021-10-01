@@ -11,7 +11,7 @@ PieceInfo::PieceInfo(int32 pi, int32 ei)
 {
 }
 
-Piece::Piece(int32 pi, Array<int32> ei, Array<Array<Color>> epd)
+Piece::Piece(int32 pi, Array<int32>& ei, Array<Array<Color>>& epd)
     :pieceId(pi),
      edgeIndex(ei)
 {
@@ -26,10 +26,17 @@ Array<std::pair<int32, PieceInfo>> Piece::calcEdgeBaseDiff()   //Šî€‚Æ‚È‚éF‚Æ‚
     Array<std::pair<int32, PieceInfo>> result;
     Array<Color> grayArray(edgePixelData.size(), Color(127, 127, 127));   //‰½‚©Šî€‚Æ‚È‚éF‚Æ”äŠr‚·‚é–‚Å‹ß‚¢‚Å‚ ‚ë‚¤’[‚ÌF‚ğ‚Âƒs[ƒX‚ğŠ„‚èo‚·
     for (int32 i = 0; i < edgeIndex.size(); i++){
+        int32 pixelDiff = 0;
         for (int32 j = 0; j < grayArray.size(); j++) {
-            //‰º‚Ì®‚ÍŠî€‚ÌF‚Æ‚Ì·‚È‚Ì‚Åâ‘Î’l‚Í‚¢‚ç‚È‚¢H(—vŒŸØ)
-            result << std::make_pair(grayArray[j].r - edgePixelData[i][j].r + grayArray[j].g - edgePixelData[i][j].g + grayArray[i].b - edgePixelData[i][j].b, PieceInfo(pieceId, edgeIndex[i]));
+            int32 absValueR = grayArray[j].r - edgePixelData[i][j].r;
+            absValueR = Abs(absValueR);
+            int32 absValueG = grayArray[j].g - edgePixelData[i][j].g;
+            absValueG = Abs(absValueG);
+            int32 absValueB = grayArray[i].b - edgePixelData[i][j].b;
+            absValueB = Abs(absValueB);
+            pixelDiff = absValueR + absValueG + absValueB;
         }
+        result << std::make_pair(pixelDiff, PieceInfo(pieceId, edgeIndex[i]));
     }
     return result;
 }
@@ -59,7 +66,13 @@ Array<int32> Piece::calcEdgeDiff(Array<Color> ed)   //‚±‚Ìƒs[ƒX‚Ì‚S•Ó‚Ì·‚ğ•Ô‚·
     Array<int32> result;
     for (int32 i = 0; i < edgePixelData.size(); i++) {
         for (int32 j = 0; j < edgePixelData[i].size(); j++) {
-            result << Abs(edgePixelData[i][j].r - ed[j].r) + Abs(edgePixelData[i][j].g - ed[j].g) + Abs(edgePixelData[i][j].b - ed[j].b);
+            int32 absValueR = edgePixelData[i][j].r - ed[j].r;
+            absValueR = Abs(absValueR);
+            int32 absValueG = edgePixelData[i][j].g - ed[j].g;
+            absValueG = Abs(absValueG);
+            int32 absValueB = edgePixelData[i][j].b - ed[j].b;
+            absValueB = Abs(absValueB);
+            result << absValueR + absValueG + absValueB;
         }
     }
     return result;

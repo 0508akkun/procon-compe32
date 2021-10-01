@@ -1,12 +1,14 @@
 #include "TexturePiece.h"
 
-TexturePiece::TexturePiece(Texture texture, int32 id, Vec2 p, int32 wh)
+TexturePiece::TexturePiece(Texture texture, int32 id, Vec2 p, int32 wh, int32 iw, int32 ih)
 	:
 	selectFlag(false),
 	pieceID(id),
 	rotatedNum(0),
 	pos(p),
-	pieceWH(wh)
+	pieceWH(wh),
+	imageWidth(iw),
+	imageHeight(ih)
 {
 	pieceTexture = texture(pos.x * pieceWH, pos.y * pieceWH, pieceWH, pieceWH);
 	piece = Quad();
@@ -59,7 +61,17 @@ TextureRegion TexturePiece::getPieceTexture() {
 }
 
 Quad TexturePiece::getPiece() {
-	piece = Rect((pieceWH + 10) * pos.x + imageOffsetX, (pieceWH + 10) * pos.y + imageOffsetY, pieceWH, pieceWH).rotated(90_deg * rotatedNum);
+	if (imageHeight >= 640 || imageHeight >= 1280) {
+		if (imageHeight >= 1280 || imageHeight >= 2560) {
+			piece = Rect(((pieceWH + imageOffsetX) * pos.x) * 0.25 + imageOffsetX, ((pieceWH + imageOffsetY) * pos.y) * 0.25 + imageOffsetY, pieceWH, pieceWH).scaled(0.25).rotated(90_deg * rotatedNum);
+		}
+		else {
+			piece = Rect(((pieceWH + imageOffsetX) * pos.x) * 0.5 + imageOffsetX, ((pieceWH + imageOffsetY) * pos.y) * 0.5 + imageOffsetY, pieceWH, pieceWH).scaled(0.5).rotated(90_deg * rotatedNum);
+		}
+	}
+	else {
+		piece = Rect((pieceWH + imageOffsetX) * pos.x + imageOffsetX, (pieceWH + imageOffsetY) * pos.y + imageOffsetY, pieceWH, pieceWH).rotated(90_deg * rotatedNum);
+	}
 	return piece;
 }
 
@@ -74,4 +86,9 @@ void TexturePiece::setCoordinate(Vec2 vec) {
 int32 TexturePiece::getPieceID()
 {
 	return pieceID;
+}
+
+int32 TexturePiece::getRotate()
+{
+	return rotatedNum;
 }

@@ -42,7 +42,8 @@ def download(url: str, token: str, wait: bool, interval: int, o: io.BytesIO) -> 
 @click.option("-f", type=click.File("r"), default="-")
 def submit(url: str, token: str, f: io.StringIO) -> None:
     endpoint = url
-    r = requests.post(endpoint, headers={"procon-token": token}, data=f)
+    fdata = f.read()
+    r = requests.post(endpoint, headers={"procon-token": token}, data=fdata)
     if r.status_code == 200:
         click.echo(r.text.strip())
         return
