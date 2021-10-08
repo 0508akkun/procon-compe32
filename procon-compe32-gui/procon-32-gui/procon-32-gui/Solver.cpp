@@ -104,17 +104,17 @@ Array<Array<std::pair<int32, int32>>> Solver::solveImage()
         }
     }
     std::sort(connectList.begin(), connectList.end(), compare_connectList);
-    for (int32 i = 50; i < 75; i++) {
-        Print << std::get<0>(connectList[i]) << U" " << std::get<1>(connectList[i]).pieceId << U" " << std::get<1>(connectList[i]).edgeIndex << U" " << std::get<2>(connectList[i]).pieceId << U" " << std::get<2>(connectList[i]).edgeIndex;
-    }
+    //for (int32 i = 50; i < 75; i++) {
+    //    Print << std::get<0>(connectList[i]) << U" " << std::get<1>(connectList[i]).pieceId << U" " << std::get<1>(connectList[i]).edgeIndex << U" " << std::get<2>(connectList[i]).pieceId << U" " << std::get<2>(connectList[i]).edgeIndex;
+    //}
     //ƒs[ƒX‚ğ’Tõ‚·‚é
     int32 x = horDivNum / 2;
     int32 y = verDivNum / 2;
     resultArray[y][x] = std::make_pair(0, 0);
     dfs(connectList, 0, graphMemo, resultArray, x, y, 0);
-    /*for (int32 i = 0; i < resultData.size(); i++) {
+    for (int32 i = 0; i < resultData.size(); i++) {
         Print << std::get<0>(resultData[i]) << U" " << std::get<1>(resultData[i]) << U" " << std::get<2>(resultData[i]) << U" " << std::get<3>(resultData[i]);
-    }*/
+    }
     calcResultData(resultData, resultArray);
     return resultArray;    //–ß‚è’l‚É
 }
@@ -132,8 +132,7 @@ void Solver::dfs(Array<std::tuple<int32, PieceInfo, PieceInfo>> cl, int32 pi, Ar
                 if (std::get<0>(cl[i]) == std::get<0>(cl[j])) {
                     if (std::get<1>(cl[i]).edgeIndex == std::get<2>(cl[j]).edgeIndex && std::get<2>(cl[i]).edgeIndex == std::get<1>(cl[j]).edgeIndex) { //Œİ‚¢‚É“¯‚¶’[‚ğQÆ‚µ‚½‚ç
                         if (gm[std::get<2>(cl[i]).pieceId] == 1)continue;
-                        rt += rotateConnectPiece(std::get<1>(cl[i]).edgeIndex);
-                        rt %= 4;
+                        rt = fromRotateConnectPiece(std::get<1>(cl[i]).edgeIndex);
                         if (rt == 0) {
                             sy--;
                             rt += 2;
@@ -143,12 +142,12 @@ void Solver::dfs(Array<std::tuple<int32, PieceInfo, PieceInfo>> cl, int32 pi, Ar
                             rt += 2;
                         }
                         else if (rt == 3) {
-                            sx--;
-                        }
-                        else {
                             sx++;
                         }
-                        rt += rotateConnectPiece(std::get<2>(cl[i]).edgeIndex);
+                        else {
+                            sx--;
+                        }
+                        rt += toRotateConnectPiece(std::get<2>(cl[i]).edgeIndex);
                         dfs(cl, std::get<2>(cl[i]).pieceId, gm, ra, sx, sy, rt);
                         break;
                     }
@@ -184,7 +183,7 @@ void Solver::calcResultData(Array<std::tuple<int32, int32, int32, int32>> rd, Ar
     }
 }
 
-int32 Solver::rotateConnectPiece(int32 index)   //edgeIndex‚©‚ç‚Ç‚Ì•ûŒü‚ğŒ©‚Ä‚é‚Ì‚©„‘ª‚·‚é
+int32 Solver::fromRotateConnectPiece(int32 index)   //edgeIndex‚©‚ç‚Ç‚Ì•ûŒü‚ğŒ©‚Ä‚é‚Ì‚©„‘ª‚·‚é
 {
     if (index % (horDivNum * 2) < horDivNum && index < horDivNum * verDivNum * 2) { //”äŠr‘O‚ÌƒGƒbƒW”Ô†‚ª‰Šú‚Åã‘¤‚Ìê‡
         return 0;
@@ -193,10 +192,26 @@ int32 Solver::rotateConnectPiece(int32 index)   //edgeIndex‚©‚ç‚Ç‚Ì•ûŒü‚ğŒ©‚Ä‚é‚
         return 2;
     }
     else if (index % (verDivNum * 2) < verDivNum && index >= horDivNum * verDivNum * 2) {   //”äŠr‘O‚ÌƒGƒbƒW”Ô†‚ª‰Šú‚Å¶‘¤‚Ìê‡
-        return 3;
+        return 1;
     }
     else {
+        return 3;
+    }
+}
+
+int32 Solver::toRotateConnectPiece(int32 index)
+{
+    if (index % (horDivNum * 2) < horDivNum && index < horDivNum * verDivNum * 2) { //”äŠr‘O‚ÌƒGƒbƒW”Ô†‚ª‰Šú‚Åã‘¤‚Ìê‡
+        return 0;
+    }
+    else if (index % (horDivNum * 2) >= horDivNum && index < horDivNum * verDivNum * 2) {    //”äŠr‘O‚ÌƒGƒbƒW”Ô†‚ª‰Šú‚Å‰º‘¤‚Ìê‡
+        return 2;
+    }
+    else if (index % (verDivNum * 2) < verDivNum && index >= horDivNum * verDivNum * 2) {   //”äŠr‘O‚ÌƒGƒbƒW”Ô†‚ª‰Šú‚Å¶‘¤‚Ìê‡
         return 1;
+    }
+    else {
+        return 3;
     }
 }
 

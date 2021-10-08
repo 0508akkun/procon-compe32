@@ -61,8 +61,8 @@ TextureRegion TexturePiece::getPieceTexture() {
 }
 
 Quad TexturePiece::getPiece() {
-	if (imageHeight >= 640 || imageHeight >= 1280) {
-		if (imageHeight >= 1280 || imageHeight >= 2560) {
+	if (imageHeight >= 640 || imageWidth >= 1280) {
+		if (imageHeight >= 1280 || imageWidth >= 2560) {
 			piece = Rect(((pieceWH + imageOffsetX) * pos.x) * 0.25 + imageOffsetX, ((pieceWH + imageOffsetY) * pos.y) * 0.25 + imageOffsetY, pieceWH, pieceWH).scaled(0.25).rotated(90_deg * rotatedNum);
 		}
 		else {

@@ -4,7 +4,7 @@
 TextureControl::TextureControl()
 {
     // ファイルをオープンする
-    TextReader reader(U"../../../../procon32_sample/problemcon1.ppm");
+    TextReader reader(U"../../../../procon32_sample/problemcon2.ppm");
 
     // オープンに失敗
     if (!reader)
