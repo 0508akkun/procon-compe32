@@ -1,7 +1,5 @@
 #include "search.hpp"
 
-const int BeamWidth = 1024;
-
 bool Check(State state)
 {
     //正しい座標までの距離がすべて0か調べる
@@ -30,6 +28,7 @@ bool Comp(std::pair<int, State> lhs, std::pair<int, State> rhs)
 
 std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordinate, int selectCostRate, int swapCostRate)
 {
+    const int BeamWidth = 65025 / NumOfDiv::Horizontal * NumOfDiv::Vertical;
     int itr = 0;
 
     //ビームサーチのキュー
