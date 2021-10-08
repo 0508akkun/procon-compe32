@@ -18,7 +18,7 @@ class Solver
 	void setResultData(int32 pieceId, int32 x, int32 y, int32 rt, Array<std::tuple<int32, int32, int32, int32>>& rd);
 	void calcResultData(Array<std::tuple<int32, int32, int32, int32>> rd, Array<Array<std::pair<int32, int32>>>& ra);
 	int32 fromRotateConnectPiece(int32 index);
-	int32 toRotateConnectPiece(int32 index);
+	int32 toRotateConnectPiece(int32 index, int32 r);
 public:
 	Solver(Image image, int32 WH, int32 hdn, int32 vdn); 
 	Array<Array<std::pair<int32, int32>>> solveImage();

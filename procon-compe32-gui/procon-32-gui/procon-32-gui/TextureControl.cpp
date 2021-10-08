@@ -1,10 +1,10 @@
 #include "TextureControl.h"
 #include "Solver.h"
 
-TextureControl::TextureControl()
+TextureControl::TextureControl(int32 dami)
 {
     // ファイルをオープンする
-    TextReader reader(U"../../../../procon32_sample/problemcon2.ppm");
+    TextReader reader(U"../../../../procon32_sample/problemcon3.ppm");
 
     // オープンに失敗
     if (!reader)
@@ -70,23 +70,29 @@ void TextureControl::checkSelectFlag()
 {
     int32 count = 0;
     Array<int32> swapNum;
-    for (int i = 0; i < horDiviNum * verDiviNum; i++) {
-        if (board[i].getSelectFlag()) {
-            swapNum << i;
-            count++;
+    if (!board.empty()) {
+        for (int i = 0; i < horDiviNum * verDiviNum; i++) {
+            if (board[i].getSelectFlag()) {
+                swapNum << i;
+                count++;
+            }
+            if (swapNum.size() == 2) {
+                pieceSwap(board, swapNum[0], swapNum[1]);
+                return;
+            }
         }
-        if (swapNum.size() == 2) {
-            pieceSwap(board, swapNum[0], swapNum[1]);
+        if (count == 0) {
             return;
         }
-    }
-    if (count == 0) {
-        return;
-    }
-    else {
-        rotatedPiece(board, swapNum);
+        else {
+            rotatedPiece(board, swapNum);
+        }
     }
     return;
+}
+
+TextureControl::TextureControl()
+{
 }
 
 void TextureControl::pieceSwap(Array<TexturePiece> &bo, int32 source, int32 to)
@@ -110,14 +116,16 @@ Array<int32> TextureControl::getPieceID()
 
 void TextureControl::showBoard()
 {
-    for (int32 i = 0; i < verDiviNum; i++) {
-        for (int32 j = 0; j < horDiviNum; j++) {
-            board[i * horDiviNum + j].setSelectFlag();
-            if (board[i * horDiviNum + j].getSelectFlag()) {
-                board[i * horDiviNum + j].getPiece()(board[i * horDiviNum + j].getPieceTexture()).draw().drawFrame(0, 3, Palette::Orange);
-            }
-            else {
-                board[i * horDiviNum + j].getPiece()(board[i * horDiviNum + j].getPieceTexture()).draw();
+    if (!board.empty()) {
+        for (int32 i = 0; i < verDiviNum; i++) {
+            for (int32 j = 0; j < horDiviNum; j++) {
+                board[i * horDiviNum + j].setSelectFlag();
+                if (board[i * horDiviNum + j].getSelectFlag()) {
+                    board[i * horDiviNum + j].getPiece()(board[i * horDiviNum + j].getPieceTexture()).draw().drawFrame(0, 3, Palette::Orange);
+                }
+                else {
+                    board[i * horDiviNum + j].getPiece()(board[i * horDiviNum + j].getPieceTexture()).draw();
+                }
             }
         }
     }

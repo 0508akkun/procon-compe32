@@ -19,6 +19,7 @@ class TextureControl
 	void moveSolverResult(Array<TexturePiece>& bo, Array<Array<std::pair<int32, int32>>>& result);
 public:
 	TextureControl();
+	TextureControl(int32 dami);
 	void checkSelectFlag();
 	void rotatedPiece(Array<TexturePiece>& bo, Array<int32> swapNum);
 	void pieceSwap(Array<TexturePiece>& bo, int32 source, int32 to);

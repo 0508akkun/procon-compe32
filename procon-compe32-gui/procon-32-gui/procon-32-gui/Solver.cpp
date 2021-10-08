@@ -123,32 +123,30 @@ void Solver::dfs(Array<std::tuple<int32, PieceInfo, PieceInfo>> cl, int32 pi, Ar
 {
     if (gm[pi] == 1) return; //’Tõæ‚Í’TõÏ‚İ
     gm[pi] = 1;    //Œ»İ‹‚éêŠ‚ğ’TõÏ‚İ‚É
-    rt %= 4;    //‰ñ“]î•ñ‚ğ0`3‚Ì”ÍˆÍ‚Ö
     setResultData(pi, x, y, rt, resultData);
     for (int32 i = 0; i < cl.size(); i++) {
         if (pi == std::get<1>(cl[i]).pieceId) { //–Ú“I‚ÌpieceIdˆÈŠO‚Í’Tõ‚µ‚È‚¢
             for (int32 j = 0; j < cl.size(); j++) {
-                int32 sx = x, sy = y;
+                int32 sx = x, sy = y, srt = rt;
                 if (std::get<0>(cl[i]) == std::get<0>(cl[j])) {
                     if (std::get<1>(cl[i]).edgeIndex == std::get<2>(cl[j]).edgeIndex && std::get<2>(cl[i]).edgeIndex == std::get<1>(cl[j]).edgeIndex) { //Œİ‚¢‚É“¯‚¶’[‚ğQÆ‚µ‚½‚ç
                         if (gm[std::get<2>(cl[i]).pieceId] == 1)continue;
-                        rt = fromRotateConnectPiece(std::get<1>(cl[i]).edgeIndex);
-                        if (rt == 0) {
+                        srt += fromRotateConnectPiece(std::get<1>(cl[i]).edgeIndex);
+                        srt %= 4; //‰ñ“]î•ñ‚ğ0`3‚Ì”ÍˆÍ‚Ö
+                        if (srt == 0) {
                             sy--;
-                            rt += 2;
                         }
-                        else if (rt == 2) {
+                        else if (srt == 2) {
                             sy++;
-                            rt += 2;
                         }
-                        else if (rt == 3) {
-                            sx++;
-                        }
-                        else {
+                        else if (srt == 3) {
                             sx--;
                         }
-                        rt += toRotateConnectPiece(std::get<2>(cl[i]).edgeIndex);
-                        dfs(cl, std::get<2>(cl[i]).pieceId, gm, ra, sx, sy, rt);
+                        else {
+                            sx++;
+                        }
+                        srt = toRotateConnectPiece(std::get<2>(cl[i]).edgeIndex, srt);
+                        dfs(cl, std::get<2>(cl[i]).pieceId, gm, ra, sx, sy, srt);
                         break;
                     }
                 }
@@ -192,26 +190,70 @@ int32 Solver::fromRotateConnectPiece(int32 index)   //edgeIndex‚©‚ç‚Ç‚Ì•ûŒü‚ğŒ©‚
         return 2;
     }
     else if (index % (verDivNum * 2) < verDivNum && index >= horDivNum * verDivNum * 2) {   //”äŠr‘O‚ÌƒGƒbƒW”Ô†‚ª‰Šú‚Å¶‘¤‚Ìê‡
-        return 1;
+        return 3;
     }
     else {
-        return 3;
+        return 1;
     }
 }
 
-int32 Solver::toRotateConnectPiece(int32 index)
+int32 Solver::toRotateConnectPiece(int32 index, int32 r)
 {
-    if (index % (horDivNum * 2) < horDivNum && index < horDivNum * verDivNum * 2) { //”äŠr‘O‚ÌƒGƒbƒW”Ô†‚ª‰Šú‚Åã‘¤‚Ìê‡
-        return 0;
+    if (r == 0) {
+        if (index % (horDivNum * 2) < horDivNum && index < horDivNum * verDivNum * 2) { //”äŠr‘O‚ÌƒGƒbƒW”Ô†‚ª‰Šú‚Åã‘¤‚Ìê‡
+            return 2;
+        }
+        else if (index % (horDivNum * 2) >= horDivNum && index < horDivNum * verDivNum * 2) {    //”äŠr‘O‚ÌƒGƒbƒW”Ô†‚ª‰Šú‚Å‰º‘¤‚Ìê‡
+            return 0;
+        }
+        else if (index % (verDivNum * 2) < verDivNum && index >= horDivNum * verDivNum * 2) {   //”äŠr‘O‚ÌƒGƒbƒW”Ô†‚ª‰Šú‚Å¶‘¤‚Ìê‡
+            return 3;
+        }
+        else {
+            return 1;
+        }
     }
-    else if (index % (horDivNum * 2) >= horDivNum && index < horDivNum * verDivNum * 2) {    //”äŠr‘O‚ÌƒGƒbƒW”Ô†‚ª‰Šú‚Å‰º‘¤‚Ìê‡
-        return 2;
+    else if (r == 1) {
+        if (index % (horDivNum * 2) < horDivNum && index < horDivNum * verDivNum * 2) { //”äŠr‘O‚ÌƒGƒbƒW”Ô†‚ª‰Šú‚Åã‘¤‚Ìê‡
+            return 3;
+        }
+        else if (index % (horDivNum * 2) >= horDivNum && index < horDivNum * verDivNum * 2) {    //”äŠr‘O‚ÌƒGƒbƒW”Ô†‚ª‰Šú‚Å‰º‘¤‚Ìê‡
+            return 1;
+        }
+        else if (index % (verDivNum * 2) < verDivNum && index >= horDivNum * verDivNum * 2) {   //”äŠr‘O‚ÌƒGƒbƒW”Ô†‚ª‰Šú‚Å¶‘¤‚Ìê‡
+            return 0;
+        }
+        else {
+            return 2;
+        }
     }
-    else if (index % (verDivNum * 2) < verDivNum && index >= horDivNum * verDivNum * 2) {   //”äŠr‘O‚ÌƒGƒbƒW”Ô†‚ª‰Šú‚Å¶‘¤‚Ìê‡
-        return 1;
+    else if (r == 2) {
+        if (index % (horDivNum * 2) < horDivNum && index < horDivNum * verDivNum * 2) { //”äŠr‘O‚ÌƒGƒbƒW”Ô†‚ª‰Šú‚Åã‘¤‚Ìê‡
+            return 0;
+        }
+        else if (index % (horDivNum * 2) >= horDivNum && index < horDivNum * verDivNum * 2) {    //”äŠr‘O‚ÌƒGƒbƒW”Ô†‚ª‰Šú‚Å‰º‘¤‚Ìê‡
+            return 2;
+        }
+        else if (index % (verDivNum * 2) < verDivNum && index >= horDivNum * verDivNum * 2) {   //”äŠr‘O‚ÌƒGƒbƒW”Ô†‚ª‰Šú‚Å¶‘¤‚Ìê‡
+            return 1;
+        }
+        else {
+            return 3;
+        }
     }
     else {
-        return 3;
+        if (index % (horDivNum * 2) < horDivNum && index < horDivNum * verDivNum * 2) { //”äŠr‘O‚ÌƒGƒbƒW”Ô†‚ª‰Šú‚Åã‘¤‚Ìê‡
+            return 1;
+        }
+        else if (index % (horDivNum * 2) >= horDivNum && index < horDivNum * verDivNum * 2) {    //”äŠr‘O‚ÌƒGƒbƒW”Ô†‚ª‰Šú‚Å‰º‘¤‚Ìê‡
+            return 3;
+        }
+        else if (index % (verDivNum * 2) < verDivNum && index >= horDivNum * verDivNum * 2) {   //”äŠr‘O‚ÌƒGƒbƒW”Ô†‚ª‰Šú‚Å¶‘¤‚Ìê‡
+            return 2;
+        }
+        else {
+            return 0;
+        }
     }
 }
 
