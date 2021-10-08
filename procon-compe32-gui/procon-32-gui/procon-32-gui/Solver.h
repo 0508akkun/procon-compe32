@@ -11,9 +11,9 @@ class Solver
 	Array<int32> graphMemo;	//ˆê“x’Ê‚Á‚½Ž–‚ª‚ ‚é‚©”»’è
 	Array<Array<std::pair<int32, int32>>> resultArray;
 	Array<std::tuple<int32, int32, int32, int32>> resultData;
-	Array<std::pair<int32, PieceInfo>> getBaseDiffList();
+	Array<std::pair<Array<Color>, PieceInfo>> getBaseDataList();
 	Array<Array<Color>> edgePixelData;
-	std::tuple<int32, PieceInfo, PieceInfo> searchConnectPiece(Array<std::pair<int32, PieceInfo>>& cl, PieceInfo bl);
+	Array<std::tuple<int32, PieceInfo, PieceInfo>> searchConnectPiece(Array<std::pair<Array<Color>, PieceInfo>>& cl, std::pair<Array<Color>, PieceInfo> bl);
 	void dfs(Array<std::tuple<int32, PieceInfo, PieceInfo>> cl, int32 pi, Array<int32>& gm, Array<Array<std::pair<int32, int32>>>& ra, int32 x, int32 y, int32 rt);
 	void setResultData(int32 pieceId, int32 x, int32 y, int32 rt, Array<std::tuple<int32, int32, int32, int32>>& rd);
 	void calcResultData(Array<std::tuple<int32, int32, int32, int32>> rd, Array<Array<std::pair<int32, int32>>>& ra);

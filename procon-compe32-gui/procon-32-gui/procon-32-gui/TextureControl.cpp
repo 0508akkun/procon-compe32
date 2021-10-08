@@ -4,7 +4,7 @@
 TextureControl::TextureControl()
 {
     // ファイルをオープンする
-    TextReader reader(U"../../../../procon32_sample/windmillnum.ppm");
+    TextReader reader(U"../../../../procon32_sample/problemcon1.ppm");
 
     // オープンに失敗
     if (!reader)
@@ -127,12 +127,12 @@ void TextureControl::setSolverData()
 {
     Solver s = Solver(image, pieceWH, horDiviNum, verDiviNum);
     result = s.solveImage();
-    for (int32 i = 0; i < result.size(); i++) {
+    /*for (int32 i = 0; i < result.size(); i++) {
         for (int32 j = 0; j < result[i].size(); j++) {
             Print << result[i][j].first << U" " << result[i][j].second;
         }
-    }
-    //moveSolverResult(board, result);
+    }*/
+    moveSolverResult(board, result);
     Print << U"Solve";
 }
 
