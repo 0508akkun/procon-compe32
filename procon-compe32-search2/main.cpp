@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <vector>
 #include "data.hpp"
-#include "search.hpp"
-#include "eval.hpp"
 #include "output.hpp"
+#include "search.hpp"
+#include "Eval.hpp"
 
 int NumOfDiv::Vertical;
 int NumOfDiv::Horizontal;
@@ -69,7 +69,7 @@ int main()
 
     FindCorrectCoordinate(correctCoordiante, status);
 
-    std::string result = BeamSearch(initialState, correctCoordiante, selectCostRate, swapCostRate);
+    std::string result = Search(initialState, status, correctCoordiante);
 
     Output(result, rotate);
 }
