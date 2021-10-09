@@ -28,9 +28,10 @@ bool Comp(std::pair<int, State> lhs, std::pair<int, State> rhs)
 
 std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordinate, int selectCostRate, int swapCostRate)
 {
-    const int minSwapCount = NumOfDiv::Horizontal + NumOfDiv::Vertical;
-    const int BeamWidth = 225000 / (NumOfDiv::Horizontal * NumOfDiv::Vertical);
+    const int minSwapCount = NumOfDiv::Horizontal * NumOfDiv::Vertical;
+    const int BeamWidth = 425 - (NumOfDiv::Horizontal * NumOfDiv::Vertical);
     int itr = 0;
+    int minScore = 1e9;
 
     //ビームサーチのキュー
     std::deque<std::pair<int, State>> beam;
@@ -58,12 +59,10 @@ std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordi
             ChangeSelection(state.second);
             state.second.cost += selectCostRate;
         }
-        else if (Check2(state.second) && state.second.numOfselect == 0 && state.second.count >= minSwapCount)
+        if (Check2(state.second) && state.second.numOfselect == 0 && state.second.count >= minSwapCount)
         {
             break;
         }
-        else 
-        { ;}
 
         std::pair<int, State> newState(state);
         //それぞれの方向と交換させる

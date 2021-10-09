@@ -10,7 +10,7 @@ int Eval(State state)
         {
             if (state.distance[x][y] == 0)
             {
-                score -= 1000;
+                score -= 50;
             }
             score += 100 * state.distance[x][y];
         }
