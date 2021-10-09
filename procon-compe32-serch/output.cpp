@@ -41,19 +41,18 @@ void Output(std::string result, std::string rotate)
     }
 
     //ファイルに出力
-    std::string output = "";
-    output += rotate + '\n';
-    output += std::to_string(selectCoordinate.size()) + '\n';
+    std::string fileName = "solution.txt";
+    std::ofstream writingFile;
+    writingFile.open(fileName, std::ios::out);
+
+    writingFile << rotate << std::endl;
+    writingFile << std::to_string(selectCoordinate.size()) << std::endl;
     for (int i = 0; i < selectCoordinate.size(); i++)
     {
-        output += std::to_string(selectCoordinate[i].x) + std::to_string(selectCoordinate[i].y) + '\n';
-        output += std::to_string(move[i].size()) + '\n';
-        output += move[i] + '\n';
+        writingFile << std::hex << selectCoordinate[i].x << selectCoordinate[i].y << std::dec << std::endl;
+        writingFile << move[i].size() << std::endl;
+        writingFile << move[i] << std::endl;
     }
 
-    std::ofstream writingFile;
-    std::string fileName = "solution.txt";
-    writingFile.open(fileName, std::ios::out);
-    writingFile << output;
     writingFile.close();
 }

@@ -11,6 +11,8 @@ struct State {
     int selectPieceX;
     int selectPieceY;
 
+    int count;
+
     std::string result;
 
     board status;
@@ -21,6 +23,7 @@ struct State {
         cost(0),
         selectPieceX(0),
         selectPieceY(0),
+        count(0),
         status(_status),
         distance(_status)
     { }

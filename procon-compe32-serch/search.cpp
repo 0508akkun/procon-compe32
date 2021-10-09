@@ -28,7 +28,8 @@ bool Comp(std::pair<int, State> lhs, std::pair<int, State> rhs)
 
 std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordinate, int selectCostRate, int swapCostRate)
 {
-    const int BeamWidth = 65025 / NumOfDiv::Horizontal * NumOfDiv::Vertical;
+    const int minSwapCount = NumOfDiv::Horizontal + NumOfDiv::Vertical;
+    const int BeamWidth = 225000 / (NumOfDiv::Horizontal * NumOfDiv::Vertical);
     int itr = 0;
 
     //ビームサーチのキュー
@@ -52,11 +53,17 @@ std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordi
         //すべて正しい座標にあれば終了
         if (Check(state.second)) break;
         //選択しているピースが正しい座標にあれば選択を変える
-        if (Check2(state.second) && state.second.numOfselect > 0) 
+        if (Check2(state.second) && state.second.numOfselect > 0 && state.second.count >= minSwapCount) 
         {
             ChangeSelection(state.second);
             state.second.cost += selectCostRate;
         }
+        else if (Check2(state.second) && state.second.numOfselect == 0 && state.second.count >= minSwapCount)
+        {
+            break;
+        }
+        else 
+        { ;}
 
         std::pair<int, State> newState(state);
         //それぞれの方向と交換させる
@@ -64,6 +71,7 @@ std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordi
         FindDistance(newState.second, correctCoordinate);
         newState.second.cost += swapCostRate;
         newState.second.result += 'U';
+        newState.second.count++;
         newState.first = Eval(newState.second);
         nexts.push_back(newState);
         newState = state;
@@ -72,6 +80,7 @@ std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordi
         FindDistance(newState.second, correctCoordinate);
         newState.second.cost += swapCostRate;
         newState.second.result += 'D';
+        newState.second.count++;
         newState.first = Eval(newState.second);
         nexts.push_back(newState);
         newState = state;
@@ -80,6 +89,7 @@ std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordi
         FindDistance(newState.second, correctCoordinate);
         newState.second.cost += swapCostRate;
         newState.second.result += 'R';
+        newState.second.count++;
         newState.first = Eval(newState.second);
         nexts.push_back(newState);
         newState = state;
@@ -88,6 +98,7 @@ std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordi
         FindDistance(newState.second, correctCoordinate);
         newState.second.cost += swapCostRate;
         newState.second.result += 'L';
+        newState.second.count++;
         newState.first = Eval(newState.second);
         nexts.push_back(newState);
         newState = state;
@@ -104,13 +115,24 @@ std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordi
             nexts.clear();
         }
 
-        if (itr == 1000)
+        //定期的に経過を表示する
+        if (itr == 2000)
         {
             std::cout << "Select: " << state.second.status[state.second.selectPieceX][state.second.selectPieceY];
             std::cout << " Score: " << state.first << std::endl;
             for (int i = 0; i <= NumOfDiv::Horizontal; i++) {
                 for (int k = 0; k <= NumOfDiv::Vertical; k++) {
-                    std::cout << state.second.status[k][i] << "(" << state.second.distance[k][i] << ")" << " ";
+                    if (i == state.second.selectPieceY && k == state.second.selectPieceX)
+                    {
+                        std::cout << "\33[41m" << state.second.status[k][i] << "\33[m" << " ";
+                        continue;
+                    }
+                    if (state.second.distance[k][i] == 0)
+                    {
+                        std::cout << "\33[44m" << state.second.status[k][i] << "\33[m" << " ";
+                        continue;
+                    }
+                    std::cout << state.second.status[k][i] << " ";
                 }
                 std::cout << std::endl;
             }
@@ -121,22 +143,23 @@ std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordi
     }
 
     //結果の表示
-    if (Check(state.second))
-    {
-        for (int i = 0; i <= NumOfDiv::Horizontal; i++) {
-            for (int k = 0; k <= NumOfDiv::Vertical; k++) {
-                std::cout << state.second.status[k][i] << " ";
+    int correct = 0;
+    int correctPercent = 0;
+    for (int i = 0; i <= NumOfDiv::Horizontal; i++) {
+        for (int k = 0; k <= NumOfDiv::Vertical; k++) {
+            if (state.second.distance[k][i] == 0)
+            {
+                std::cout << "\33[44m" << state.second.status[k][i] << "\33[m" << " ";
+                correct++;
+                continue;
             }
-            std::cout << std::endl;
+            std::cout << state.second.status[k][i] << " ";
         }
         std::cout << std::endl;
-        std::cout << state.second.result << std::endl;
-        std::cout << std::endl;
     }
-    else
-    {
-        std::cout << "Not found" << std::endl;
-    }
+    std::cout << std::endl;
+    correctPercent = (correct * 100) / ((NumOfDiv::Horizontal+1) * (NumOfDiv::Vertical+1));
+    std::cout << "一致率: " << correctPercent << "%" << std::endl;
     state.second.result += '\n';
     return state.second.result;
 }
@@ -161,6 +184,8 @@ void Select(State& state)
     }
     state.selectPieceX = maxX;
     state.selectPieceY = maxY;
+    state.numOfselect--;
+    state.count == 0;
     state.result += std::to_string(maxX) + " " + std::to_string(maxY) + '\n';
 }
 
@@ -184,5 +209,6 @@ void ChangeSelection(State& state)
     state.selectPieceX = maxX;
     state.selectPieceY = maxY;
     state.numOfselect--;
+    state.count = 0;
     state.result += '\n' + std::to_string(maxX) + " " + std::to_string(maxY) + '\n';
 }

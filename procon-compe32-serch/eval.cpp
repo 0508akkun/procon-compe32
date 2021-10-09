@@ -8,17 +8,24 @@ int Eval(State state)
     {
         for (int x = 0; x <= NumOfDiv::Vertical; x++)
         {
-            score += 20 * state.distance[x][y];
+            if (state.distance[x][y] == 0)
+            {
+                score -= 1000;
+            }
+            score += 100 * state.distance[x][y];
         }
     }
     score += state.cost;
-    score -= 5 * state.numOfselect;
     //同じ状態に戻る動作は不要
     for (int i = 0; i < state.result.size()-1; i++)
     {
         if (state.result.substr(i, 2) == "RL" || state.result.substr(i, 2) == "LR" || state.result.substr(i, 2) == "UD" || state.result.substr(i, 2) == "DU")
         {
-            score += 10;
+            score += 100;
+        }
+        if (state.result.substr(i, 2) == "RR" || state.result.substr(i, 2) == "LL" || state.result.substr(i, 2) == "UU" || state.result.substr(i, 2) == "DD")
+        {
+            score += 100;
         }
     }
     return score;
