@@ -5,7 +5,7 @@ import urllib.parse
 import click
 import requests
 
-URL = "https://procon32-practice.kosen.work"
+URL = "https://procon32-akita.kosen.work"
 
 
 @click.group()
