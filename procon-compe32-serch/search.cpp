@@ -29,7 +29,7 @@ bool Comp(std::pair<int, State> lhs, std::pair<int, State> rhs)
 std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordinate, int selectCostRate, int swapCostRate)
 {
     const int minSwapCount = (NumOfDiv::Horizontal+1) * (NumOfDiv::Vertical+1);
-    const int BeamWidth = 112500 / (NumOfDiv::Horizontal * NumOfDiv::Vertical);
+    const int BeamWidth = 40000 / (NumOfDiv::Horizontal * NumOfDiv::Vertical);
     int itr = 0;
     int minScore = 1e9;
 
@@ -166,6 +166,7 @@ std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordi
     std::cout << std::endl;
     correctPercent = (correct * 100) / ((NumOfDiv::Horizontal+1) * (NumOfDiv::Vertical+1));
     std::cout << "一致率: " << correctPercent << "%" << std::endl;
+    std::cout << "Cost: " << min.second.cost << std::endl;    
     min.second.result += '\n';
     return min.second.result;
 }
