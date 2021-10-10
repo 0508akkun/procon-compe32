@@ -28,8 +28,8 @@ bool Comp(std::pair<int, State> lhs, std::pair<int, State> rhs)
 
 std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordinate, int selectCostRate, int swapCostRate)
 {
-    const int minSwapCount = NumOfDiv::Horizontal * NumOfDiv::Vertical;
-    const int BeamWidth = 425 - (NumOfDiv::Horizontal * NumOfDiv::Vertical);
+    const int minSwapCount = (NumOfDiv::Horizontal+1) * (NumOfDiv::Vertical+1);
+    const int BeamWidth = 112500 / (NumOfDiv::Horizontal * NumOfDiv::Vertical);
     int itr = 0;
     int minScore = 1e9;
 
@@ -40,6 +40,7 @@ std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordi
     FindDistance(initialState, correctCoordinate);
     Select(initialState);
 
+    std::pair<int, State> min(1e9, initialState);
     //評価値と盤面のPair
     std::pair<int, State> state(Eval(initialState), initialState);
 
@@ -62,6 +63,11 @@ std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordi
         if (Check2(state.second) && state.second.numOfselect == 0 && state.second.count >= minSwapCount)
         {
             break;
+        }
+
+        if (Comp(state, min)) 
+        {
+            min = state;
         }
 
         std::pair<int, State> newState(state);
@@ -101,6 +107,7 @@ std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordi
         newState.first = Eval(newState.second);
         nexts.push_back(newState);
         newState = state;
+
         //キューが空になったら次のイテレーション用のキューからビーム幅取り出す
         if (beam.empty())
         {
@@ -146,21 +153,21 @@ std::string BeamSearch(State initialState, std::vector<Coordinate> correctCoordi
     int correctPercent = 0;
     for (int i = 0; i <= NumOfDiv::Horizontal; i++) {
         for (int k = 0; k <= NumOfDiv::Vertical; k++) {
-            if (state.second.distance[k][i] == 0)
+            if (min.second.distance[k][i] == 0)
             {
-                std::cout << "\33[44m" << state.second.status[k][i] << "\33[m" << " ";
+                std::cout << "\33[44m" << min.second.status[k][i] << "\33[m" << " ";
                 correct++;
                 continue;
             }
-            std::cout << state.second.status[k][i] << " ";
+            std::cout << min.second.status[k][i] << " ";
         }
         std::cout << std::endl;
     }
     std::cout << std::endl;
     correctPercent = (correct * 100) / ((NumOfDiv::Horizontal+1) * (NumOfDiv::Vertical+1));
     std::cout << "一致率: " << correctPercent << "%" << std::endl;
-    state.second.result += '\n';
-    return state.second.result;
+    min.second.result += '\n';
+    return min.second.result;
 }
 
 void Select(State& state)

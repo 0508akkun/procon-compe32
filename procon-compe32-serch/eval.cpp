@@ -12,7 +12,7 @@ int Eval(State state)
             {
                 score -= 50;
             }
-            score += 100 * state.distance[x][y];
+            score += 130 * state.distance[x][y];
         }
     }
     score += state.cost;
@@ -21,11 +21,7 @@ int Eval(State state)
     {
         if (state.result.substr(i, 2) == "RL" || state.result.substr(i, 2) == "LR" || state.result.substr(i, 2) == "UD" || state.result.substr(i, 2) == "DU")
         {
-            score += 100;
-        }
-        if (state.result.substr(i, 2) == "RR" || state.result.substr(i, 2) == "LL" || state.result.substr(i, 2) == "UU" || state.result.substr(i, 2) == "DD")
-        {
-            score += 100;
+            score += 1000;
         }
     }
     return score;
